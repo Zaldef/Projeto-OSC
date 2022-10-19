@@ -24,32 +24,32 @@ DIG2	DB	10,'Digite o segundo numero (0-9): $'
         MOV AH,01           ;
         INT 21h             ;
         MOV BH,AL           ;
-        AND BH,0Fh          ;
+        AND BH,0Fh          ; Reconhece a entrada do primeiro caracter, converte para numero e armazena em BH
 
         LEA DX,DIG2         ;              
         CALL PRINT          ;
         MOV AH,01           ;      
         INT 21h             ;
         MOV BL,AL           ;
-        AND BL,0Fh          ;
+        AND BL,0Fh          ; Reconhece a entrada do primeiro caracter, converte para numero e armazena em BL
 
         LEA DX,MSG1         ;         
         CALL PRINT          ;
-        LEA DX,OP1          ;
+        LEA DX,OP1          ; ADD
         CALL PRINT          ;
-        LEA DX,OP2          ;
+        LEA DX,OP2          ; SUB
         CALL PRINT          ;
-        LEA DX,OP3          ;
+        LEA DX,OP3          ; MUL
         CALL PRINT          ;
-        LEA DX,OP4          ;
+        LEA DX,OP4          ; DIV
         CALL PRINT          ;
-        LEA DX,OP5          ;
+        LEA DX,OP5          ; AND
         CALL PRINT          ;
-        LEA DX,OP6          ;
+        LEA DX,OP6          ; OR
         CALL PRINT          ;
-        LEA DX,OP7          ;
+        LEA DX,OP7          ; XOR
         CALL PRINT          ;
-        LEA DX,OP8          ;
+        LEA DX,OP8          ; NOT
         CALL PRINT          ; Tela inical, qual operação escolher
 
         MOV AH,08h          ;
@@ -69,78 +69,54 @@ DIG2	DB	10,'Digite o segundo numero (0-9): $'
         CMP AL,37h          ;
         JE XOR              ;
         CMP AL,38h          ;
-        JE NOT              ;Jumps para as operações
+        JE NOT              ; Jumps para as operações (ADD, SUB MUL DIV AND OR XOR NOT)
 
     ADD:
-        ADD BH,BL
-        JMP RESULT
+        ADD BH,BL           ;            
+        JMP RESULT          ; Operação ADD 
     SUB:
-        SUB BH,BL
-        JMP RESULT
+        SUB BH,BL           ; 
+        JMP RESULT          ; Operação SUB
     MUL:
-        JMP FIM
+        JMP RESULT
     DIV:
-        JMP FIM
+        JMP RESULT
     AND:
-        JMP FIM
+        JMP RESULT
     OR:
-        JMP FIM
+        JMP RESULT
     XOR:
-        JMP FIM
+        JMP RESULT
     NOT:
-        JMP FIM
+        JMP RESULT
     RESULT:
-    xor ax,AX
-    MOV Al,Bh
+    XOR AX,AX              ; Zera o registrador AX para ser utilizado 
+    MOV AL,BH              ; Trás o resultado da operação para AL
+   
+    MOV BL,10              ;
+    DIV BL                 ;
+    MOV BX,AX              ; Diviede os caracteres em armazena em BH/BL
 
-    MOV BL,10
-    DIV BL
-    MOV BX,AX
-    MOV DL,BL
-    OR  DL,30H
-    MOV AH,02h
-    INT 21h
-    MOV DL,BH
-    OR  DL,30H
-    MOV AH,2
-    INT 21h
-    JMP FIM
+    MOV DL,BL              ;
+    OR  DL,30H             ; 
+    MOV AH,02h             ;
+    INT 21h                ; Converte para caracter e imprime o primeiro digito
+
+    MOV DL,BH              ;
+    OR  DL,30H             ;
+    MOV AH,2               ;
+    INT 21h                ;
+    JMP FIM                ; Converte para caracter e imprime o segundo digito
     
-    
-    
-    
-    
-    
-    
-    FIM:
+    FIM:                    ;
         MOV AH,4Ch          ;
         INT 21h             ;Exit do programa
-    MAIN ENDP
+    MAIN ENDP               ;
+  
+    PRINT PROC              ;
+        MOV AH,09h          ;
+	    INT 21h             ;
+	    RET                 ;
+    PRINT ENDP              ; Proc para dar print na tela
 
-    
-    PRINT PROC
-        MOV AH,09h
-	    INT 21h
-	    RET  
-    PRINT ENDP
-
-    LF PROC
-        MOV AH,02h
-        MOV DL,10
-        INT 21h
-        RET 
-    LF ENDP
 END MAIN
-
-MOV AX,18
-MOV BL,10
-DIV BL
-MOV BX,AX
-MOV DL BL
-OR DL 30H
-MOV AH, 2
-INT 21H
-MOV DL,BL
-OR DL, 30H
-MOV AH,2
-
