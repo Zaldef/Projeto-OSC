@@ -1,15 +1,16 @@
 TITLE Guilherme Roelli (22899140) & Vitor Yuzo Takei (22023740)
 .MODEL SMALL
 .STACK 100h
-.DATA ; Todos os numeros em HEXA/DECIMAL e virgulas vazia são puramente formatação 
-LAYOUT1 DB  0C9h,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0BBh,'$'
+.DATA ; Todos os numeros em HEXA/DECIMAL e virgulas vazia são para emolduramento/formatação da calculadora
+LAYOUT1 DB  10,0C9h,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0BBh,'$'
 LAYOUT2 DB  ,,,0BAh,10,0CCh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0B9H,'$'
 LAYOUT3 DB  10,0CCh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0B9H,'$'
-LAYOUT4 DB  ,,,,,,,,,,,,,,,,,,0BAh,10,0C8h,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0BCh,'$'
+LAYOUT4 DB  ,,,,,,,,0BAh,10,0C8h,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0BCh,'$'
 DIG1	DB	10,0BAh,'Digite o primeiro n',0A3H,'mero (0-9): $'
 DIG2	DB	,,0BAh,10,0BAh,'Digite o segundo n',0A3H,'mero (0-9): $'
 MSG1    DB  10,0BAh,'Escolha a opera',87h,'ao:',,,,,,,,,,,,,,,,,0BAh,10,'$'
 MSG2    DB  10,0BAh,'O resultado ',82h,': $'
+MSG3    DB  10,0BAh,'Deseja continuar (S / N): $'
 OP1     DB  0BAh,'1 - Adi',87h,'ao',,,,,,,,,,,,,,,,,,,,,,,,,,0BAh,10,'$'
 OP2     DB  0BAh,'2 - Subtra',87h,'ao',,,,,,,,,,,,,,,,,,,,,,,0BAh,10,'$'
 OP3     DB  0BAh,'3 - Multiplica',87h,'ao',,,,,,,,,,,,,,,,,,,0BAh,10,'$'
@@ -23,26 +24,27 @@ OP8     DB  0BAh,'8 - NOT',,,,,,,,,,,,,,,,,,,,,,,,,,,,,0BAh,'$'
     MAIN PROC
         MOV AX,@DATA       ;
         MOV DS,AX          ; Inicio ao segmento de data
+
         LEA DX,LAYOUT1     ;
-        CALL PRINT         ;
+        CALL PRINT         ; Vai formatar a "moldura" da calculadora
         LEA DX,DIG1        ;         
-        CALL PRINT         ;
+        CALL PRINT         ; Vai printar o texto para entrada para o primeiro digito
         MOV AH,01          ;
         INT 21h            ;
         MOV BH,AL          ;
-        AND BH,0Fh         ; Reconhece a entrada do primeiro caracter, converte para numero e armazena em BH
+        AND BH,0Fh         ; Reconhece a entrada do primeiro caracter, armazena em BH e converte para numero e armazena em BH
 
         LEA DX,DIG2        ;              
-        CALL PRINT         ;
+        CALL PRINT         ; Vai printar o texto para entrada para o segundo digito
         MOV AH,01          ;      
         INT 21h            ;
         MOV BL,AL          ;
-        AND BL,0Fh         ; Reconhece a entrada do primeiro caracter, converte para numero e armazena em BL
+        AND BL,0Fh         ; Reconhece a entrada do segundo caracter, armazena em BL e converte para numero 
 
         LEA DX,LAYOUT2     ;
-        CALL PRINT         ;
+        CALL PRINT         ; Vai formatar a "moldura" da calculadora
         LEA DX,MSG1        ;         
-        CALL PRINT         ;
+        CALL PRINT         ; Vai printar o texto para escolha de operação
         LEA DX,OP1         ; ADD
         CALL PRINT         ;
         LEA DX,OP2         ; SUB
@@ -77,7 +79,7 @@ OP8     DB  0BAh,'8 - NOT',,,,,,,,,,,,,,,,,,,,,,,,,,,,,0BAh,'$'
         CMP AL,37h         ;
         JE XOR             ;
         CMP AL,38h         ;
-        JE NOT             ; Jumps para as operações (ADD, SUB MUL DIV AND OR XOR NOT)
+        JE NOT             ; Vai pegar a entrada do teclado e realizar um CMP para definir o jumps para a operação (ADD, SUB, MUL, DIV, AND, OR, XOR, NOT)
 
     ADD:
         ADD BH,BL          ;            
@@ -105,7 +107,7 @@ OP8     DB  0BAh,'8 - NOT',,,,,,,,,,,,,,,,,,,,,,,,,,,,,0BAh,'$'
     
     RESULTN:
         LEA DX,LAYOUT3     ;
-        CALL PRINT         ;
+        CALL PRINT         ; Vai formatar a "moldura" da calculadora
         LEA DX,MSG2        ;         
         CALL PRINT         ; Printa a MSG2
 
@@ -119,11 +121,11 @@ OP8     DB  0BAh,'8 - NOT',,,,,,,,,,,,,,,,,,,,,,,,,,,,,0BAh,'$'
         OR  DL,30h         ;
         MOV AH,02h         ;
         INT 21h            ; Nega o resultado e converte para caracter e depois printa na tela
-        JMP FIM            ;
+        JMP FIM            ; Jump para o final da calculador
     
     RESULT:
         LEA DX,LAYOUT3     ;
-        CALL PRINT  	   ;
+        CALL PRINT  	   ; Vai formatar a "moldura" da calculadora
         LEA DX,MSG2        ;         
         CALL PRINT         ; Printa a MSG2   
     
@@ -132,7 +134,7 @@ OP8     DB  0BAh,'8 - NOT',,,,,,,,,,,,,,,,,,,,,,,,,,,,,0BAh,'$'
    
         MOV BL,10          ;
         DIV BL             ;
-        MOV BX,AX          ; Diviede os caracteres em armazena em BH/BL
+        MOV BX,AX          ; Diviede os numeros e armazena em BH/BL
 
         MOV DL,BL          ;
         OR  DL,30h         ; 
@@ -142,12 +144,28 @@ OP8     DB  0BAh,'8 - NOT',,,,,,,,,,,,,,,,,,,,,,,,,,,,,0BAh,'$'
         MOV DL,BH          ;
         OR  DL,30h         ;
         MOV AH,2           ;
+        INT 21h            ; Converte para caracter e imprime o segundo digito
+        JMP FIM            ; Jump para o fim da calculadora
+
+    RESTART:
+        LEA DX, LAYOUT4    ; 
+        CALL PRINT         ; Vai formatar a "moldura" da calculadora
+        CALL MAIN          ; Vai retornar para o inicio da MAIN PROC
+
+    FIM:
+        LEA DX,LAYOUT3     ;
+        CALL PRINT         ; Vai formatar a "moldura" da calculadora
+        LEA DX,MSG3        ;
+        CALL PRINT         ; Vai printar o texto para o restart da calculadora
+        MOV AH,01h         ;
         INT 21h            ;
-        JMP FIM            ; Converte para caracter e imprime o segundo digito
-    
-    FIM: 
-        LEA DX,LAYOUT4     ;
-        CALL PRINT         ; Fecha a moldura
+        CMP AL, 73h        ;
+        JE RESTART         ;
+        CMP AL,53h         ;
+        JE RESTART         ; Vai pegar a entrada do teclado e realizar um CMP para definir se deve ou não encerrar a calculadora 
+           
+        LEA DX,LAYOUT4     ; Vai formatar a "moldura" da calculadora
+        CALL PRINT         ; Fecha a "moldura" da calculadora
         MOV AH,4Ch         ;
         INT 21h            ; Exit do programa
     MAIN ENDP              ;
@@ -156,6 +174,6 @@ OP8     DB  0BAh,'8 - NOT',,,,,,,,,,,,,,,,,,,,,,,,,,,,,0BAh,'$'
         MOV AH,09h         ;
 	    INT 21h            ;
 	    RET                ;
-    PRINT ENDP             ; Proc para dar print na tela
+    PRINT ENDP             ; Procedimento para dar print na tela
 
 END MAIN
