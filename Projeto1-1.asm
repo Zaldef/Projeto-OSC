@@ -82,14 +82,31 @@ OP8     DB  0BAh,'8 - NOT',,,,,,,,,,,,,,,,,,,,,,,,,,,,,0BAh,'$'
         JE NOT             ; Vai pegar a entrada do teclado e realizar um CMP para definir o jumps para a operação (ADD, SUB, MUL, DIV, AND, OR, XOR, NOT)
 
     ADD:
-        ADD BH,BL          ;            
-        JMP RESULT         ; Operação ADD 
+        ADD BH,BL          ; Operação ADD           
+        JMP RESULT         ;  
     SUB:
         SUB BH,BL          ; 
         JS  RESULTN        ;
         JMP RESULT         ; Operação SUB
     MUL:
+        XOR CX,CX          ; Limpar o registrador CX, que vai ser usado como auxiliar na contagem desta OP
+        CMP BL,0           ; Se o multiplicador(BL) for 0, jump para "X0"
+        JE X0              ;
+    MULV:
+        SHR BL,1           ; Desloca o ultimo bit do multiplicador(BL) para direita, jogando em CF
+        JC AUX1            ; Se CF for 1, jump para AUX1, se ñ segue o codigo
+        SHL BH,1           ; Desloca BH uma casa para direita 
+        JMP MULV           ;
+    AUX1: 
+        ADD CH,BH          ; Adiciona o Numerador(BH) no produto(CH)
+        SHL BH,1           ;    
+        CMP BL,0           ; Enquanto o Multiplicador(BL) nao for zero, ñ pula para o resultado
+        JNE MULV           ;
+        MOV BH, CH         ; Joga o produto em BH, para ser processado pelo RESULT
         JMP RESULT         ; Operação MUL
+    X0:
+        XOR BH,BH          ; Zera BH
+        JMP RESULT         ;
     DIV:
         JMP RESULT         ; Operação DIV
     AND:
