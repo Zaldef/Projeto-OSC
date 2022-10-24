@@ -2,24 +2,24 @@ TITLE Guilherme Roelli (22899140) & Vitor Yuzo Takei (22023740)
 .MODEL SMALL
 .STACK 100h
 .DATA ; Todos os numeros em HEXA/DECIMAL e virgulas vazia são para emolduramento/formatação da calculadora
-LAYOUT1 DB  10,0C9h,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0BBh,'$'
-LAYOUT2 DB  ,,,0BAh,10,0CCh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0B9H,'$'
-LAYOUT3 DB  10,0CCh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0B9H,'$'
-LAYOUT4 DB  ,,,,,,,,0BAh,10,0C8h,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0BCh,'$'
-LAYOUT5 DB  ,,,,,,,,,,,,,,,,,,0BAh,10,0CCh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0B9H,'$'
+LAYOUT1 DB  10,0C9h,35 DUP (0CDh),0BBh,'$'
+LAYOUT2 DB  3 DUP (),0BAh,10,0CCh,35 DUP (0CDh),0B9H,'$'
+LAYOUT3 DB  10,0CCh,35 DUP (0CDh),0B9H,'$'
+LAYOUT4 DB  8 DUP (),0BAh,10,0C8h,35 DUP (0CDh),0BCh,'$'
+LAYOUT5 DB  18 DUP (),0BAh,10,0CCh,35 DUP (0CDh),0B9H,'$'
 DIG1	DB	10,0BAh,'Digite o primeiro n',0A3H,'mero (0-9): $'
 DIG2	DB	,,0BAh,10,0BAh,'Digite o segundo n',0A3H,'mero (0-9): $'
 MSG1    DB  10,0BAh,'Escolha a opera',87h,'ao:',,,,,,,,,,,,,,,,,0BAh,10,'$'
 MSG2    DB  10,0BAh,'O resultado ',82h,': $'
 MSG3    DB  10,0BAh,'Deseja continuar (S / N): $'
-OP1     DB  0BAh,'1 - Adi',87h,'ao',,,,,,,,,,,,,,,,,,,,,,,,,,0BAh,10,'$'
-OP2     DB  0BAh,'2 - Subtra',87h,'ao',,,,,,,,,,,,,,,,,,,,,,,0BAh,10,'$'
-OP3     DB  0BAh,'3 - Multiplica',87h,'ao',,,,,,,,,,,,,,,,,,,0BAh,10,'$'
-OP4     DB  0BAh,'4 - Divisao',,,,,,,,,,,,,,,,,,,,,,,,,0BAh,10,'$'
-OP5     DB  0BAh,'5 - AND',,,,,,,,,,,,,,,,,,,,,,,,,,,,,0BAh,10,'$'
-OP6     DB  0BAh,'6 - OR',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,0BAh,10,'$'
-OP7     DB  0BAh,'7 - XOR',,,,,,,,,,,,,,,,,,,,,,,,,,,,,0BAh,10,'$'
-OP8     DB  0BAh,'8 - NOT',,,,,,,,,,,,,,,,,,,,,,,,,,,,,0BAh,'$'
+OP1     DB  0BAh,'1 - Adi',87h,'ao', 25 DUP (),0BAh,10,'$'
+OP2     DB  0BAh,'2 - Subtra',87h,'ao',22 DUP (),0BAh,10,'$'
+OP3     DB  0BAh,'3 - Multiplica',87h,'ao',18 DUP (),0BAh,10,'$'
+OP4     DB  0BAh,'4 - Divisao',24 DUP (),0BAh,10,'$'
+OP5     DB  0BAh,'5 - AND',27 DUP (),0BAh,10,'$'
+OP6     DB  0BAh,'6 - OR',28 DUP (),0BAh,10,'$'
+OP7     DB  0BAh,'7 - XOR',27 DUP (),0BAh,10,'$'
+OP8     DB  0BAh,'8 - NOT',27 DUP (),0BAh,'$'
 
 .CODE
     MAIN PROC
