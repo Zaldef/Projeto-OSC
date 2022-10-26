@@ -1,773 +1,206 @@
-TITLE	CALCULADORA
-.MODEL	SMALL
-.STACK 	100H
-.DATA
-BARRA		DB		'--------------------------------------------------------------------------------$'
-INICIAR		DB		'Para iniciar selecione a primeira base:$'
-INICIAR2	DB		'Escolha a segunda base: (se for NOT digite 0)$'
-INICIAR3	DB		'Escolha a base:$'
-INICIAR4	DB		'Escolha a base de saida:$'
-LETA		DB		'A - AND$'
-LETB		DB		'B - OR$'
-LETC		DB		'C - XOR$'
-LETD		DB		'D - NOT$'
-LETE		DB		'E - Soma$'
-LETF		DB		'F - Subtracao$'
-LETG		DB		'G - Multiplicacao$'
-LETH		DB		'H - Divisao$'
-LETI		DB		'I - Multiplicacao por 2$'
-LETJ		DB		'J - Divisao por 2$'
-FUNCAO		DB		'Digite a letra: $'
-BINARIO		DB		'1 - Binario$'
-DEDIMAL		DB		'2 - Decimal$'
-HEXADECIMAL	DB		'3 - Hexadecimal$'
-OCTAL		DB		'4 - Octal$'
-BASEESC		DB		'Digite o numero: $'
-DIG1		DB		'Digite o primeiro numero: $'
-DIG2		DB		'Digite o segundo numero: $'
-RESP		DB		'A resposta e: $'
-ESCOLHER	DB		'Deseja continuar (S / N): $'
-AUX1		DW		?
-AUX2		DW		?
+TITLE Guilherme Roelli (22899140) & Vitor Yuzo Takei (22023740)
+.MODEL SMALL
+.STACK 100h
+.DATA ; Todos os numeros em HEXA/DECIMAL e virgulas vazia são puramente formatação 
+LAYOUT1 DB  0C9h,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0BBh,'$'
+LAYOUT2 DB  ,,,0BAh,10,0CCh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0B9H,'$'
+LAYOUT3 DB  10,0CCh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0B9H,'$'
+LAYOUT4 DB  ,,,,,,,,,,,,,,,,,,0BAh,10,0C8h,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0BCh,'$'
+DIG1	DB	10,0BAh,'Digite o primeiro n',0A3H,'mero (0-9): $'
+DIG2	DB	,,0BAh,10,0BAh,'Digite o segundo n',0A3H,'mero (0-9): $'
+MSG1    DB  10,0BAh,'Escolha a opera',87h,'ao:',,,,,,,,,,,,,,,,,0BAh,10,'$'
+MSG2    DB  10,0BAh,'O resultado ',82h,': $'
+OP1     DB  0BAh,'1 - Adi',87h,'ao',,,,,,,,,,,,,,,,,,,,,,,,,,0BAh,10,'$'
+OP2     DB  0BAh,'2 - Subtra',87h,'ao',,,,,,,,,,,,,,,,,,,,,,,0BAh,10,'$'
+OP3     DB  0BAh,'3 - Multiplica',87h,'ao',,,,,,,,,,,,,,,,,,,0BAh,10,'$'
+OP4     DB  0BAh,'4 - Divisao',,,,,,,,,,,,,,,,,,,,,,,,,0BAh,10,'$'
+OP5     DB  0BAh,'5 - AND',,,,,,,,,,,,,,,,,,,,,,,,,,,,,0BAh,10,'$'
+OP6     DB  0BAh,'6 - OR',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,0BAh,10,'$'
+OP7     DB  0BAh,'7 - XOR',,,,,,,,,,,,,,,,,,,,,,,,,,,,,0BAh,10,'$'
+OP8     DB  0BAh,'8 - NOT',,,,,,,,,,,,,,,,,,,,,,,,,,,,,0BAh,'$'
+RESTO   DB  10,'O resto e:$'
+DIVISAO_ZERO DB 10,10,'NAO E POSSIVEL DIVIDIR POR ZERO$'
+
 .CODE
-	MAIN		PROC
-	
-	MOV		AX,@DATA		;Comando para strings
-	MOV		DS,AX
+    MAIN PROC
+        MOV AX,@DATA       ;
+        MOV DS,AX          ; Inicio ao segmento de data
+        LEA DX,LAYOUT1     ;
+        CALL PRINT         ;
+        LEA DX,DIG1        ;         
+        CALL PRINT         ;
+        MOV AH,01          ;
+        INT 21h            ;
+        MOV BH,AL          ;
+        AND BH,0Fh         ; Reconhece a entrada do primeiro caracter, converte para numero e armazena em BH
 
-INICIAR5:
-	LEA		DX,BARRA		;print
-	CALL	PRINTSTRING
-	
-	LEA		DX,INICIAR		;print
-	CALL	PRINTSTRING
-	
-	CALL	USADO
-	
-	CMP		AL,31H			;Comparacao para jumps
-	JE		AU1
-	CMP		AL,32H
-	JE		AU2
-	CMP		AL,33H
-	JE		AU3
-	CMP		AL,34H
-	JE		AU4
-	CALL	PULALINHA
-	JMP		INICIAR5
+        LEA DX,DIG2        ;              
+        CALL PRINT         ;
+        MOV AH,01          ;      
+        INT 21h            ;
+        MOV BL,AL          ;
+        AND BL,0Fh         ; Reconhece a entrada do primeiro caracter, converte para numero e armazena em BL
 
-AU1:
-	JMP		A1
-AU2:
-	JMP		A2
-AU3:
-	JMP		A3
-AU4:
-	JMP		A4
-	
-A1:	;Binario
+        LEA DX,LAYOUT2     ;
+        CALL PRINT         ;
+        LEA DX,MSG1        ;         
+        CALL PRINT         ;
+        LEA DX,OP1         ; ADD
+        CALL PRINT         ;
+        LEA DX,OP2         ; SUB
+        CALL PRINT         ;
+        LEA DX,OP3         ; MUL
+        CALL PRINT         ;
+        LEA DX,OP4         ; DIV
+        CALL PRINT         ;
+        LEA DX,OP5         ; AND
+        CALL PRINT         ;
+        LEA DX,OP6         ; OR
+        CALL PRINT         ;
+        LEA DX,OP7         ; XOR
+        CALL PRINT         ;
+        LEA DX,OP8         ; NOT
+        CALL PRINT         ; Tela inical, qual operação escolher
 
-	CALL	PULALINHA
-	LEA		DX,DIG1
-	CALL	PRINTSTRING
-	CALL	ENTBIN
-	MOV		AUX1,BX
-	JMP		ENTNUM2
+        MOV AH,08h         ;
+        INT 21h            ;
+        CMP AL,31h         ;
+        JE ADD             ;
+        CMP AL,32h         ;
+        JE SUB             ;
+        CMP AL,33h         ;
+        JE MUL             ;
+        CMP AL,34h         ;
+        JE DIV             ; 
+        CMP AL,35h         ;
+        JE AND             ;
+        CMP AL,36h         ;
+        JE OR              ;
+        CMP AL,37h         ;
+        JE XOR             ;
+        CMP AL,38h         ;
+        JE NOT             ; Jumps para as operações (ADD, SUB MUL DIV AND OR XOR NOT)
 
-A2:	;Decimal
+    ADD:
+        ADD BH,BL          ;            
+        JMP RESULT         ; Operação ADD 
+    SUB:
+        SUB BH,BL          ; 
+        JS  RESULTN        ;
+        JMP RESULT         ; Operação SUB
+    MUL:
+        JMP RESULT         ; Operação MUL
+    DIV:
+INICIO_DIVISAO:
+CMP BL,00h            ; compara o divisor (segundo dígito) com 0
+JE ERRO_DIVISAO       ; se for 0 vai para mensagem de erro
 
-	CALL	PULALINHA
-	LEA		DX,DIG1
-	CALL	PRINTSTRING
-	CALL	ENTDEC
-	MOV		AUX1,AX
-	JMP		ENTNUM2
+CMP BH,BL             ; comparar os valores de entrada
+JB IMPRIMIR_DIVISAO   ; se BH menor que BL, da o JUMP, se não, continua
 
-A3:	;Hexadecimal
+CALCULO:              ; operação da divisao
+SUB BH,BL             ; subtrair o divisor do dividendo
+ADD CL, 01h           ; valor do quociente
+CMP BH,BL             ; comparando os valores após a subtração
+JAE CALCULO           ; se BH for maior que BL, JUMP, se não continua
 
-	CALL	PULALINHA
-	LEA		DX,DIG1
-	CALL	PRINTSTRING
-	CALL	ENTHEX
-	MOV		AUX1,BX
-	JMP		ENTNUM2
+IMPRIMIR_DIVISAO:     ; resultado da divisao
+XOR DX,DX             ; limpando DX
+MOV AH,09
+LEA DX, MSG2          ; imprimir mensagem de resultado
+INT 21h
 
-A4:	;Octal
+XOR DX,DX
+XOR AX,AX
+MOV AH,02       
+MOV DL,CL             ; armazena o resultado da divisão no registrador de impressão
+OR DL,30h             ; transforma em caractrer
+INT 21h               ; imprime resultado da divisão
 
-	CALL	PULALINHA
-	LEA		DX,DIG1
-	CALL	PRINTSTRING
-	CALL	ENTOCT
-	MOV		AUX1,AX
-	JMP		ENTNUM2
-	
-ENTNUM2:
+MOV AH,09       
+LEA DX,RESTO          ; Imprime a mensagem de resto
+INT 21h  
 
-INICIAR6:
-	LEA		DX,BARRA		;print
-	CALL	PRINTSTRING
-	
-	LEA		DX,INICIAR2		;print
-	CALL	PRINTSTRING
-	
-	CALL	PULALINHA
-	
-	LEA		DX,BINARIO		;print
-	CALL	PRINTSTRING
-	
-	CALL	PULALINHA
-	
-	LEA		DX,DEDIMAL		;print
-	CALL	PRINTSTRING
-	
-	CALL	PULALINHA
-	
-	LEA		DX,HEXADECIMAL	;print
-	CALL	PRINTSTRING
-	
-	CALL	PULALINHA
-	
-	LEA		DX,OCTAL		;print
-	CALL	PRINTSTRING
-	
-	CALL	PULALINHA
-	
-	LEA		DX,BARRA		;print
-	CALL	PRINTSTRING
-	
-	CALL	PULALINHA
-	
-	LEA		DX,BASEESC		;print
-	CALL	PRINTSTRING
-	
-	MOV		AH,1			;seleciona o numero
-	INT		21H
-	
-	CMP		AL,31H			;Comparacao para jumps
-	JE		AU5
-	CMP		AL,32H
-	JE		AU6
-	CMP		AL,33H
-	JE		AU7
-	CMP		AL,34H
-	JE		AU8
-	CMP		AL,30H
-	JE		SUPERNOTAU
-	CALL	PULALINHA
-	JMP		INICIAR6
-	
-AU5:
-	JMP		A5
-AU6:
-	JMP		A6
-AU7:
-	JMP		A7
-AU8:
-	JMP		A8
-SUPERNOTAU:
-	JMP		SUPERNOT
-	
-A5:	;Binario
+XOR DX,DX
+MOV AH,02       
+MOV DL,BH             ; Armazena o resto da impressão no registrador de impressão
+OR DL,30h             ; Transforma em caracter
+INT 21h               ; Imrpime o resto
 
-	CALL	PULALINHA
-	LEA		DX,DIG2
-	CALL	PRINTSTRING
-	CALL	ENTBIN
-	MOV		AUX2,BX
-	JMP		ESCOP
+JMP FIM
 
-A6:	;Decimal
+ERRO_DIVISAO:
+MOV AH,09         
+LEA DX,DIVISAO_ZERO   ; Imprime a mensagem de erro de divisao por zero
+INT 21h           
 
-	CALL	PULALINHA
-	LEA		DX,DIG2
-	CALL	PRINTSTRING
-	CALL	ENTDEC
-	MOV		AUX2,AX
-	JMP		ESCOP
+JMP FIM
+    AND:
+        AND BH,BL          ;
+        JMP RESULT         ; Operação AND
+    OR:
+        OR BH,BL           ;
+        JMP RESULT         ; Operação OR
+    XOR:
+        XOR BH,BL          ;
+        JMP RESULT         ; Operação XOR
+    NOT:
+        NOT BH             ;
+        JMP RESULT         ; Operação NOT
+    
+    RESULTN:
+        LEA DX,LAYOUT3     ;
+        CALL PRINT         ;
+        LEA DX,MSG2        ;         
+        CALL PRINT         ; Printa a MSG2
 
-A7:	;Hexadecimal
+        MOV DL,2Dh         ;
+        MOV AH,02h         ;
+        INT 21h            ; Printa o sinal "-"
+        
+       
+        MOV DL,BH          ;
+        NEG DL             ; 
+        OR  DL,30h         ;
+        MOV AH,02h         ;
+        INT 21h            ; Nega o resultado e converte para caracter e depois printa na tela
+        JMP FIM            ;
+    
+    RESULT:
+        LEA DX,LAYOUT3     ;
+        CALL PRINT  	   ;
+        LEA DX,MSG2        ;         
+        CALL PRINT         ; Printa a MSG2   
+    
+        XOR AX,AX          ; Zera o registrador AX para ser utilizado 
+        MOV AL,BH          ; Trás o resultado da operação para AL
+   
+        MOV BL,10          ;
+        DIV BL             ;
+        MOV BX,AX          ; Diviede os caracteres em armazena em BH/BL
 
-	CALL	PULALINHA
-	LEA		DX,DIG2
-	CALL	PRINTSTRING
-	CALL	ENTHEX
-	MOV		AUX2,BX
-	JMP		ESCOP
+        MOV DL,BL          ;
+        OR  DL,30h         ; 
+        MOV AH,02h         ;
+        INT 21h            ; Converte para caracter e imprime o primeiro digito
+  
+        MOV DL,BH          ;
+        OR  DL,30h         ;
+        MOV AH,2           ;
+        INT 21h            ;
+        JMP FIM            ; Converte para caracter e imprime o segundo digito
+    
+    FIM: 
+        LEA DX,LAYOUT4     ;
+        CALL PRINT         ; Fecha a moldura
+        MOV AH,4Ch         ;
+        INT 21h            ; Exit do programa
+    MAIN ENDP              ;
+  
+    PRINT PROC             ;
+        MOV AH,09h         ;
+	    INT 21h            ;
+	    RET                ;
+    PRINT ENDP             ; Proc para dar print na tela
 
-A8:	;Octal
-
-	CALL	PULALINHA
-	LEA		DX,DIG2
-	CALL	PRINTSTRING
-	CALL	ENTOCT
-	MOV		AUX2,AX
-	JMP		ESCOP
-	
-ESCOP:
-
-INICIAR7:
-	LEA		DX,BARRA		;print
-	CALL	PRINTSTRING
-	
-	CALL	PULALINHA
-	
-	LEA		DX,INICIAR3		;print
-	CALL	PRINTSTRING
-
-	CALL	PULALINHA
-	
-	LEA		DX,LETA			;print
-	CALL	PRINTSTRING
-	
-	CALL	PULALINHA
-	
-	LEA		DX,LETB			;print
-	CALL	PRINTSTRING
-	
-	CALL	PULALINHA
-	
-	LEA		DX,LETC			;print
-	CALL	PRINTSTRING
-	
-	CALL	PULALINHA
-	
-	LEA		DX,LETD			;print
-	CALL	PRINTSTRING
-	
-	CALL	PULALINHA
-	
-	LEA		DX,LETE			;print
-	CALL	PRINTSTRING
-	
-	CALL	PULALINHA
-	
-	LEA		DX,LETF			;print
-	CALL	PRINTSTRING
-	
-	CALL	PULALINHA
-	
-	LEA		DX,LETG			;print
-	CALL	PRINTSTRING
-	
-	CALL	PULALINHA
-	
-	LEA		DX,LETH			;print
-	CALL	PRINTSTRING
-	
-	CALL	PULALINHA
-	
-	LEA		DX,LETI			;print
-	CALL	PRINTSTRING
-	
-	CALL	PULALINHA
-	
-	LEA		DX,LETJ			;print
-	CALL	PRINTSTRING
-	
-	CALL	PULALINHA
-	
-	LEA		DX,BARRA		;print
-	CALL	PRINTSTRING
-
-	LEA		DX,FUNCAO		;print
-	CALL	PRINTSTRING
-	
-	MOV		AH,1			;seleciona o numero
-	INT		21H
-	
-	CMP		AL,41H			;switch case
-	JE		AuxA
-	CMP		AL,61H
-	JE		AuxA
-	CMP		AL,42H
-	JE		AuxB
-	CMP		AL,62H
-	JE		AuxB
-	CMP		AL,43H
-	JE		AuxC
-	CMP		AL,63H
-	JE		AuxC
-	CMP		AL,44H
-	JE		AuxD
-	CMP		AL,64H
-	JE		AuxD
-	CMP		AL,45H
-	JE		AuxE
-	CMP		AL,65H
-	JE		AuxE
-	CMP		AL,46H
-	JE		AuxF
-	CMP		AL,66H
-	JE		AuxF
-	CMP		AL,47H
-	JE		AuxG
-	CMP		AL,67H
-	JE		AuxG
-	CMP		AL,48H
-	JE		AuxH
-	CMP		AL,68H
-	JE		AuxH
-	CMP		AL,49H
-	JE		AuxI
-	CMP		AL,69H
-	JE		AuxI
-	CMP		AL,74D
-	JE		AuxJ
-	CMP		AL,106D
-	JE		AuxJ
-	CALL	PULALINHA
-	JMP		INICIAR7
-	
-AuxA:
-	JMP		A
-AuxB:
-	JMP		B
-AuxC:
-	JMP		C
-AuxD:
-	JMP		D
-AuxE:
-	JMP		E
-AuxF:
-	JMP		F
-AuxG:
-	JMP		G
-AuxH:
-	JMP		H
-AuxI:
-	JMP		I	
-AuxJ:
-	JMP		J
-	
-A:	;AND
-
-	MOV		BX,AUX2
-	AND		AUX1,BX
-	JMP		AQUI
-
-B:	;OR
-
-	MOV		BX,AUX2
-	OR		AUX1,BX
-	JMP		AQUI
-	
-C:	;XOR
-
-	MOV		BX,AUX2
-	XOR		AUX1,BX
-	JMP		AQUI
-
-SUPERNOT:
-D:	;NOT
-
-	NOT		AUX1
-	JMP		AQUI
-
-E:	;SOMA
-
-	MOV		BX,AUX2
-	ADD		AUX1,BX
-	JMP		AQUI
-
-F:	;SUBTRACAO
-
-	MOV		BX,AUX2
-	SUB		AUX1,BX
-	JMP		AQUI
-
-G:	;MULTIPLICACAO
-
-	MOV		AX,AUX1
-	MOV		BX,AUX2
-	IMUL	BX
-	MOV		AUX1,AX
-	JMP		AQUI
-	
-H:	;DIVISAO
-
-	MOV		AX,AUX1
-	MOV		BX,AUX2
-	CWD
-	IDIV	BX
-	MOV		AUX1,AX
-	JMP		AQUI
-
-I:	;MULTIPLICACAO POR 2
-
-	MOV		AX,AUX1
-	XOR		CX,CX
-	MOV		CX,AUX2
-LOOPING1:
-	SHL			AX,1
-	SHL			AX,1
-	DEC			CX
-	JNZ			LOOPING1
-	MOV			AUX1,AX
-	JMP			AQUI
-	
-J:	;DIVISAO POR 2
-
-	MOV		AX,AUX1
-	XOR		CX,CX
-	MOV		CX,AUX2
-LOOPING2:
-	SHR			AX,1
-	SHR			AX,1
-	DEC			CX
-	JNZ			LOOPING2
-	MOV			AUX1,AX
-	JMP			AQUI
-
-AQUI:
-
-INICIAR8:	
-	CALL	PULALINHA
-	
-	LEA		DX,BARRA		;print
-	CALL	PRINTSTRING
-	
-	LEA		DX,INICIAR4		;print
-	CALL	PRINTSTRING
-	
-	CALL	USADO
-	
-	CMP		AL,31H			;Comparacao para jumps
-	JE		AU9
-	CMP		AL,32H
-	JE		AU10
-	CMP		AL,33H
-	JE		AU11
-	CMP		AL,34H
-	JE		AU12
-	CALL	PULALINHA
-	JMP		INICIAR8
-
-AU9:
-	JMP		A9
-AU10:
-	JMP		A10
-AU11:
-	JMP		A11
-AU12:
-	JMP		A12
-	
-A9:	;Binario
-
-	CALL	PULALINHA
-	LEA		DX,RESP
-	CALL	PRINTSTRING
-	MOV		BX,AUX1
-	CALL	SAIBIN
-	CALL	ESCOLHA
-
-A10:;Decimal
-
-	CALL	PULALINHA
-	LEA		DX,RESP
-	CALL	PRINTSTRING
-	MOV		AX,AUX1
-	CALL	SAIDEC
-	CALL	ESCOLHA
-
-A11:;Hexadecimal
-
-	CALL	PULALINHA
-	LEA		DX,RESP
-	CALL	PRINTSTRING
-	MOV		BX,AUX1
-	CALL	SAIHEX
-	CALL	ESCOLHA
-
-A12:;Octal
-
-	CALL	PULALINHA
-	LEA		DX,RESP
-	CALL	PRINTSTRING
-	MOV		AX,AUX1
-	CALL	SAIOCT
-	CALL	ESCOLHA
-	
-	MAIN		ENDP
-	
-	ENTDEC	PROC	;Entrada decimal
-	
-		PUSH 	BX
-		PUSH 	CX
-		PUSH 	DX
-		XOR 	BX,BX
-		XOR 	CX,CX
-		MOV 	AH,1h
-		INT 	21h
-		CMP 	AL, '-'
-		JE 		MENOS
-		CMP 	AL,'+'
-		JE 		MAIS
-		JMP 	NUM
-MENOS: 	MOV		CX,1
-MAIS: 	INT 	21h
-NUM: 	AND 	AX,000Fh
-		PUSH 	AX
-		MOV	 	AX,10
-		MUL 	BX
-		POP 	BX
-		ADD 	BX,AX
-		MOV 	AH,1h
-		INT 	21h
-		CMP 	AL,0Dh
-		JNE 	NUM
-		MOV 	AX,BX
-		CMP 	CX,1
-		JNE 	SAIDA
-		NEG 	AX
-SAIDA: 	POP 	DX
-		POP 	CX
-		POP 	BX
-		RET
-
-	ENTDEC	ENDP
-	
-	SAIDEC	PROC	;Saida decimal
-
-		PUSH 	AX
-		PUSH 	BX
-		PUSH 	CX
-		PUSH 	DX
-		OR 		AX,AX
-		JGE 	PT1
-		PUSH 	AX
-		MOV 	DL,'-'
-		MOV 	AH,2h
-		INT 	21h
-		POP 	AX
-		NEG 	AX
-PT1: 	XOR 	CX,CX
-		MOV 	BX,10
-PT2: 	XOR 	DX,DX
-		DIV 	BX
-		PUSH 	DX
-		INC 	CX
-		OR 		AX,AX
-		JNE 	PT2
-		MOV 	AH,2h
-PT3: 	POP 	DX
-		ADD 	DL,30h
-		INT 	21h
-		LOOP 	PT3
-		POP 	DX
-		POP 	CX
-		POP 	BX
-		POP 	AX
-		RET
-
-	SAIDEC	ENDP
-	
-	ENTBIN	PROC	;Entrada Binario
-	
-		MOV 	CX,16
-		MOV 	AH,1h
-		XOR 	BX,BX
-		INT 	21h
-TOPO: 	CMP 	AL,0Dh
-		JE 		FIM
-		AND 	AL,0Fh
-		SHL 	BX,1
-		OR 		BL,AL
-		INT 	21h
-		LOOP 	TOPO
-FIM:	RET
-	
-	ENTBIN	ENDP
-	
-	SAIBIN	PROC	;Saida Binario
-	
-		MOV 	CX,16
-		MOV 	AH,02h
-PAR1: 	ROL 	BX,1
-		JNC 	PAR2
-		MOV 	DL,31h
-		INT 	21h
-		JMP		PAR3
-PAR2: 	MOV 	DL,30h
-		INT 	21h
-PAR3:	LOOP	PAR1
-		RET
-	
-	SAIBIN	ENDP	
-	
-	ENTHEX	PROC	;Entrada Hexadecimal
-	
-		XOR 	BX,BX
-		MOV 	CL,4
-		MOV 	AH,1h
-		INT 	21h
-FINAL:	CMP 	AL,0Dh
-		JE 		FINZ
-		CMP 	AL,39h
-		JG 		LETRA
-		AND 	AL,0Fh
-		JMP 	DESL
-LETRA: 	SUB 	AL,37h
-DESL: 	SHL 	BX,CL
-		OR 		BL,AL
-		INT 	21h
-		JMP 	FINAL 
-FINZ:	RET
-	
-	ENTHEX	ENDP
-
-	SAIHEX	PROC	;saida hexadecimal
-		
-		MOV 	CH,4
-		MOV 	CL,4
-		MOV 	AH,2h
-FIN: 	MOV 	DL,BH
-		SHR 	DL,CL
-		CMP 	DL,0Ah
-		JAE 	LET
-		ADD 	DL,30h
-		JMP 	PART1
-LET: 	ADD 	DL,37h
-PART1: 	INT 	21h
-		ROL 	BX,CL
-		DEC 	CH
-		JNZ 	FIN
-		RET
-	
-	SAIHEX	ENDP
-
-	ENTOCT	PROC	;Entrada Octal
-	
-		PUSH 	BX
-		PUSH 	CX
-		PUSH 	DX
-		XOR 	BX,BX
-		XOR 	CX,CX
-		MOV 	AH,1h
-		INT 	21h
-NU: 	AND 	AX,000Fh
-		PUSH 	AX
-		MOV	 	AX,8
-		MUL 	BX
-		POP 	BX
-		ADD 	BX,AX
-		MOV 	AH,1h
-		INT 	21h
-		CMP 	AL,0Dh
-		JNE 	NU
-		MOV 	AX,BX
-		CMP 	CX,1
-		JNE 	SAINDO
-		NEG 	AX
-SAINDO:	POP 	DX
-		POP 	CX
-		POP 	BX
-		RET
-
-	ENTOCT	ENDP
-	
-	SAIOCT	PROC		;Saida Octal
-
-		PUSH 	AX
-		PUSH 	BX
-		PUSH 	CX
-		PUSH 	DX
-		OR 		AX,AX
-		XOR 	CX,CX
-		MOV 	BX,8
-PT: 	XOR 	DX,DX
-		DIV 	BX
-		PUSH 	DX
-		INC 	CX
-		OR 		AX,AX
-		JNE 	PT
-		MOV 	AH,2h
-PTT: 	POP 	DX
-		ADD 	DL,30h
-		INT 	21h
-		LOOP 	PTT
-		POP 	DX
-		POP 	CX
-		POP 	BX
-		POP 	AX
-		RET
-
-	SAIOCT	ENDP
-	
-	ESCOLHA		PROC		;escolhe se quer sair ou fazer mais uma conta
-REPTI:
-	CALL	PULALINHA
-	CALL	PULALINHA
-	LEA		DX,ESCOLHER
-	CALL	PRINTSTRING
-	CALL	PULALINHA
-	MOV		AH,1
-	INT		21H
-	CMP		AL,53H
-	JE		DNV
-	CMP		AL,73H
-	JE		DNV
-	CMP		AL,78D
-	JE		NEM
-	CMP		AL,110D
-	JE		NEM
-	JMP		REPTI
-DNV:CALL	MAIN
-NEM:CALL	FIMZAO
-	ESCOLHA		ENDP
-	
-	PULALINHA	PROC		;pula linha e volta para o inicio
-	MOV		AH,2
-	MOV		DL,0DH
-	INT		21H
-	MOV		DL,0AH
-	INT		21H
-	RET
-	PULALINHA	ENDP
-	
-	PRINTSTRING	PROC
-	MOV		AH,9
-	INT		21H
-	RET
-	PRINTSTRING	ENDP
-	
-	FIMZAO		PROC			;saida para o DOS
-	MOV		AH,4CH
-	INT		21H
-	FIMZAO		ENDP
-	
-	USADO		PROC			;printa escolha da base
-	CALL	PULALINHA
-	
-	LEA		DX,BINARIO		;print
-	CALL	PRINTSTRING
-	
-	CALL	PULALINHA
-	
-	LEA		DX,DEDIMAL		;print
-	CALL	PRINTSTRING
-	
-	CALL	PULALINHA
-	
-	LEA		DX,HEXADECIMAL	;print
-	CALL	PRINTSTRING
-	
-	CALL	PULALINHA
-	
-	LEA		DX,OCTAL		;print
-	CALL	PRINTSTRING
-	
-	CALL	PULALINHA
-	
-	LEA		DX,BARRA		;print
-	CALL	PRINTSTRING
-	
-	CALL	PULALINHA
-	
-	LEA		DX,BASEESC		;print
-	CALL	PRINTSTRING
-	
-	MOV		AH,1			;seleciona o numero
-	INT		21H
-	RET
-	USADO		ENDP
-	
-	END		MAIN
+END MAIN

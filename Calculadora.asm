@@ -7,19 +7,21 @@ LAYOUT2 DB  3 DUP (),0BAh,10,0CCh,35 DUP (0CDh),0B9H,'$'
 LAYOUT3 DB  10,0CCh,35 DUP (0CDh),0B9H,'$'
 LAYOUT4 DB  8 DUP (),0BAh,10,0C8h,35 DUP (0CDh),0BCh,'$'
 LAYOUT5 DB  18 DUP (),0BAh,10,0CCh,35 DUP (0CDh),0B9H,'$'
+LAYOUT6 DB  8 DUP (),0BAh,10,0CCh,35 DUP (0CDh),0B9H,'$'
 DIG1	DB	10,0BAh,'Digite o primeiro n',0A3H,'mero (0-9): $'
 DIG2	DB	,,0BAh,10,0BAh,'Digite o segundo n',0A3H,'mero (0-9): $'
-MSG1    DB  10,0BAh,'Escolha a opera',87h,'ao:',,,,,,,,,,,,,,,,,0BAh,10,'$'
+MSG1    DB  10,0BAh,'Escolha a opera',87h,'ao;',16 DUP (),0BAh,10,'$'
 MSG2    DB  10,0BAh,'O resultado ',82h,': $'
 MSG3    DB  10,0BAh,'Deseja continuar (S / N): $'
+MSG4    DB  10,0BAh,0A5H,,82h,' possivel dividir por 0 $'
 OP1     DB  0BAh,'1 - Adi',87h,'ao', 25 DUP (),0BAh,10,'$'
 OP2     DB  0BAh,'2 - Subtra',87h,'ao',22 DUP (),0BAh,10,'$'
 OP3     DB  0BAh,'3 - Multiplica',87h,'ao',18 DUP (),0BAh,10,'$'
 OP4     DB  0BAh,'4 - Divisao',24 DUP (),0BAh,10,'$'
-OP5     DB  0BAh,'5 - AND',27 DUP (),0BAh,10,'$'
-OP6     DB  0BAh,'6 - OR',28 DUP (),0BAh,10,'$'
-OP7     DB  0BAh,'7 - XOR',27 DUP (),0BAh,10,'$'
-OP8     DB  0BAh,'8 - NOT',27 DUP (),0BAh,'$'
+OP5     DB  0BAh,'5 - AND',28 DUP (),0BAh,10,'$'
+OP6     DB  0BAh,'6 - OR',29 DUP (),0BAh,10,'$'
+OP7     DB  0BAh,'7 - XOR',28 DUP (),0BAh,10,'$'
+OP8     DB  0BAh,'8 - NOT',28 DUP (),0BAh,'$'
 
 .CODE
     MAIN PROC
@@ -92,24 +94,44 @@ OP8     DB  0BAh,'8 - NOT',27 DUP (),0BAh,'$'
     MUL:
         XOR CX,CX          ; Limpar o registrador CX, que vai ser usado como auxiliar na contagem desta OP
         CMP BL,0           ; Se o multiplicador(BL) for 0, jump para "X0"
-        JE X0              ;
-    MULV:
-        SHR BL,1           ; Desloca o ultimo bit do multiplicador(BL) para direita, jogando em CF
-        JC AUX1            ; Se CF for 1, jump para AUX1, se ñ segue o codigo
-        SHL BH,1           ; Desloca BH uma casa para direita 
-        JMP MULV           ;
-    AUX1: 
-        ADD CH,BH          ; Adiciona o Numerador(BH) no produto(CH)
-        SHL BH,1           ;    
-        CMP BL,0           ; Enquanto o Multiplicador(BL) nao for zero, ñ pula para o resultado
-        JNE MULV           ;
-        MOV BH, CH         ; Joga o produto em BH, para ser processado pelo RESULT
-        JMP RESULT         ; Operação MUL
-    X0:
-        XOR BH,BH          ; Zera BH
-        JMP RESULT         ;
+        JE M0              ;
+        MAUX1:             ; Segmento auxiliar da multiplicação 1
+            SHR BL,1       ; Desloca o ultimo bit do multiplicador(BL) para direita, jogando em CF
+            JC MAUX2       ; Se CF for 1, jump para AUX1, se ñ segue o codigo
+            SHL BH,1       ; Desloca BH uma casa para direita 
+            JMP MAUX1      ;
+        MAUX2:             ; Segmento auxiliar da multiplicação 2
+            ADD CH,BH      ; Adiciona o Numerador(BH) no produto(CH)
+            SHL BH,1       ;    
+            CMP BL,0       ; Enquanto o Multiplicador(BL) nao for zero, ñ pula para o resultado
+            JNE MAUX1      ;
+            MOV BH, CH     ; Joga o produto em BH, para ser processado pelo RESULT
+            JMP RESULT     ; Operação MUL
+        M0:
+            XOR BH,BH      ; Zera BH
+            JMP RESULT     ;
     DIV:
-        JMP RESULT         ; Operação DIV
+        CMP BL,0
+        JE D0
+        DAUX1:
+            RCL BH,1
+            JNC DAUX1
+            RCR BH,1
+        DAUX2:
+            RCL BL,1
+            JNC DAUX2
+            RCR BL,1
+        DAUX3:
+            SUB BH,BL
+
+        D0:
+            LEA DX, LAYOUT3
+            CALL PRINT
+            LEA DX, MSG4
+            CALL PRINT
+        LEA DX,LAYOUT6     ;
+        CALL PRINT         ; Vai formatar a "moldura" da calculadora
+        JMP FIM         ; Operação DIV
     AND:
         AND BH,BL          ;
         JMP RESULT         ; Operação AND
@@ -163,6 +185,8 @@ OP8     DB  0BAh,'8 - NOT',27 DUP (),0BAh,'$'
         OR  DL,30h         ;
         MOV AH,2           ;
         INT 21h            ; Converte para caracter e imprime o segundo digito
+        LEA DX,LAYOUT5     ;
+        CALL PRINT         ; Vai formatar a "moldura" da calculadora
         JMP FIM            ; Jump para o fim da calculadora
 
     RESTART:
@@ -171,8 +195,7 @@ OP8     DB  0BAh,'8 - NOT',27 DUP (),0BAh,'$'
         CALL MAIN          ; Vai retornar para o inicio da MAIN PROC
 
     FIM:
-        LEA DX,LAYOUT5     ;
-        CALL PRINT         ; Vai formatar a "moldura" da calculadora
+        
         LEA DX,MSG3        ;
         CALL PRINT         ; Vai printar o texto para o restart da calculadora
         MOV AH,01h         ;
