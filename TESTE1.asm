@@ -2,8 +2,8 @@ TITLE Guilherme Roelli (22899140) & Vitor Yuzo Takei (22023740)
 .MODEL SMALL
 .CODE
     MAIN PROC
-    MOV BH,6
-    MOV BL,3
+    MOV BH,7
+    MOV BL,2
         DAUX1:
             SHL BH,4
         DAUX2:
@@ -11,18 +11,15 @@ TITLE Guilherme Roelli (22899140) & Vitor Yuzo Takei (22023740)
         DAUX3:
             CMP BH,BL
             JAE DAUX4
-            SHR BL,1
-            SHL CL,1
-            CMP BL,0
-            JA DAUX3
-            JMP FIM
+            JB FIM
+            JMP DAUX3
         DAUX4:
             SUB BH,BL
-            SHR BL,2
-            ADD CL,1
-            CMP BL,0
-            JA DAUX3
-            JMP FIM
+            ADD CL, 1
+            JMP DAUX3
+            CMP BH,0
+            JE FIM
+            JMP DAUX3
 
 
     FIM:

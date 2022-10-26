@@ -75,23 +75,19 @@ OP8     DB  0BAh,'8 - NOT',28 DUP (),0BAh,'$'
         JE MUL             ;
         CMP AL,34h         ;
         JE DIV             ; 
-        CMP AL,35h         ;
-        JE AND             ;
-        CMP AL,36h         ;
-        JE OR              ;
-        CMP AL,37h         ;
-        JE XOR             ;
-        CMP AL,38h         ;
-        JE NOT             ; Vai pegar a entrada do teclado e realizar um CMP para definir o jumps para a operação (ADD, SUB, MUL, DIV, AND, OR, XOR, NOT)
-
-    ADD:
-        ADD BH,BL          ; Operação ADD           
+        CALL LOGIC         ;
+        JMP RESULT         ; Vai pegar a entrada do teclado e realizar um CMP para definir o jumps para a operação (ADD, SUB, MUL, DIV, AND, OR, XOR, NOT)
+        
+    ADD:                   ; Operação ADD
+        ADD BH,BL          ; Adiciona BL em BH
         JMP RESULT         ;  
-    SUB:
-        SUB BH,BL          ; 
+
+    SUB:                   ; Operação SUB
+        SUB BH,BL          ; Subtrai BL de BH
         JS  RESULTN        ;
-        JMP RESULT         ; Operação SUB
-    MUL:
+        JMP RESULT         ; 
+
+    MUL:                   ; Operação MUL
         XOR CX,CX          ; Limpar o registrador CX, que vai ser usado como auxiliar na contagem desta OP
         CMP BL,0           ; Se o multiplicador(BL) for 0, jump para "X0"
         JE M0              ;
@@ -106,55 +102,44 @@ OP8     DB  0BAh,'8 - NOT',28 DUP (),0BAh,'$'
             CMP BL,0       ; Enquanto o Multiplicador(BL) nao for zero, ñ pula para o resultado
             JNE MAUX1      ;
             MOV BH, CH     ; Joga o produto em BH, para ser processado pelo RESULT
-            JMP RESULT     ; Operação MUL
-        M0:
+            JMP RESULT     ;
+        M0:                ; Multiplicação por 0
             XOR BH,BH      ; Zera BH
             JMP RESULT     ;
-    DIV:
-        CMP BL,0
-        JE D0
-        DAUX1:
-            SHL BH,4
-        DAUX2:
-            SHL BL,4
-        DAUX3:
-            CMP BH,BL
-            JAE DAUX4
-            CMP BH,0
-            JE FIM
-            CMP BH,1
-            JE FIM
-            JMP DAUX3
-        DAUX4:
-            SUB BH,BL
-            ADD CL, 1
-            JMP DAUX3
-            CMP BH,0
-            JE FIM
-            JMP DAUX3
 
-        D0:
-            LEA DX, LAYOUT3
-            CALL PRINT
-            LEA DX, MSG4
-            CALL PRINT
+    DIV:                   ; Operação DIV
+        XOR CX,CX          ; Limpar o registrador CX, que vai ser usado como auxiliar na contagem desta OP
+        CMP BL,0           ; Se o divisor(BL) for 0, jump para "D0"
+        JE D0              ;
+        DAUX1:             ;
+            SHL BH,4       ;
+            SHL BL,4       ;
+        DAUX2:             ;
+            CMP BH,BL      ;
+            JAE DAUX3      ;
+            JB DAUX4       ;
+            JMP DAUX2      ;
+        DAUX3:             ;
+            SUB BH,BL      ;
+            ADD CL, 1      ;
+            JMP DAUX2      ;
+            CMP BH,0       ;
+            JE DAUX4       ;  
+            JMP DAUX2      ;
+        DAUX4:             ;
+            MOV BL,BH      ;
+            MOV BH,CL      ;
+            JMP RESULT     ;
+        D0:                ;
+            LEA DX, LAYOUT3;
+            CALL PRINT     ;
+            LEA DX, MSG4   ;
+            CALL PRINT     ;
         LEA DX,LAYOUT6     ;
         CALL PRINT         ; Vai formatar a "moldura" da calculadora
-        JMP FIM         ; Operação DIV
-    AND:
-        AND BH,BL          ;
-        JMP RESULT         ; Operação AND
-    OR:
-        OR BH,BL           ;
-        JMP RESULT         ; Operação OR
-    XOR:
-        XOR BH,BL          ;
-        JMP RESULT         ; Operação XOR
-    NOT:
-        NOT BH             ;
-        JMP RESULT         ; Operação NOT
-    
-    RESULTN:
+        JMP FIM            ; Operação DIV
+
+    RESULTN:               ; Resultado negativo
         LEA DX,LAYOUT3     ;
         CALL PRINT         ; Vai formatar a "moldura" da calculadora
         LEA DX,MSG2        ;         
@@ -172,7 +157,7 @@ OP8     DB  0BAh,'8 - NOT',28 DUP (),0BAh,'$'
         INT 21h            ; Nega o resultado e converte para caracter e depois printa na tela
         JMP FIM            ; Jump para o final da calculador
     
-    RESULT:
+    RESULT:                ; Resultado
         LEA DX,LAYOUT3     ;
         CALL PRINT  	   ; Vai formatar a "moldura" da calculadora
         LEA DX,MSG2        ;         
@@ -198,7 +183,7 @@ OP8     DB  0BAh,'8 - NOT',28 DUP (),0BAh,'$'
         CALL PRINT         ; Vai formatar a "moldura" da calculadora
         JMP FIM            ; Jump para o fim da calculadora
 
-    RESTART:
+    RESTART:               ; Reset do programa
         LEA DX, LAYOUT4    ; 
         CALL PRINT         ; Vai formatar a "moldura" da calculadora
         CALL MAIN          ; Vai retornar para o inicio da MAIN PROC
@@ -219,11 +204,34 @@ OP8     DB  0BAh,'8 - NOT',28 DUP (),0BAh,'$'
         MOV AH,4Ch         ;
         INT 21h            ; Exit do programa
     MAIN ENDP              ;
+
+    LOGIC PROC             ; Procedimentos Logicos
+        CMP AL,35h         ;
+        JE AND             ;
+        CMP AL,36h         ;
+        JE OR              ;
+        CMP AL,37h         ;
+        JE XOR             ;
+        CMP AL,38h         ;
+        JE NOT 
+        AND:
+            AND BH,BL          ;
+            RET                ; Operação AND
+        OR:
+            OR BH,BL       ;
+            RET            ; Operação OR
+        XOR:
+            XOR BH,BL      ;
+            RET            ; Operação XOR
+        NOT:
+            NOT BH         ;
+            RET            ; Operação NOT
+    LOGIC ENDP
   
-    PRINT PROC             ;
+    PRINT PROC             ; Procedimento para dar print na tela
         MOV AH,09h         ;
 	    INT 21h            ;
 	    RET                ;
-    PRINT ENDP             ; Procedimento para dar print na tela
+    PRINT ENDP             ; 
 
 END MAIN
