@@ -124,7 +124,8 @@ OP8     DB  0BAh,'8 - NOT',28 DUP (),0BAh,'$'
             JAE DAUX4
             CMP BH,0
             JE FIM
-            SHR BL,1
+            CMP BH,1
+            JE FIM
             JMP DAUX3
         DAUX4:
             SUB BH,BL
