@@ -114,9 +114,7 @@ OP8     DB  0BAh,'8 - NOT',28 DUP (),0BAh,'$'
         CMP BL,0
         JE D0
         DAUX1:
-            RCL BH,1
-            JNC DAUX1
-            RCR BH,1
+            SHL BH,4
         DAUX2:
             SHL BL,4
         DAUX3:
