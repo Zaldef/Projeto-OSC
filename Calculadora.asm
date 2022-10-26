@@ -118,11 +118,21 @@ OP8     DB  0BAh,'8 - NOT',28 DUP (),0BAh,'$'
             JNC DAUX1
             RCR BH,1
         DAUX2:
-            RCL BL,1
-            JNC DAUX2
-            RCR BL,1
+            SHL BL,4
         DAUX3:
+            CMP BH,BL
+            JAE DAUX4
+            CMP BH,0
+            JE FIM
+            SHR BL,1
+            JMP DAUX3
+        DAUX4:
             SUB BH,BL
+            ADD CL, 1
+            JMP DAUX3
+            CMP BH,0
+            JE FIM
+            JMP DAUX3
 
         D0:
             LEA DX, LAYOUT3
