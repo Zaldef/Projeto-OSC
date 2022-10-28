@@ -93,12 +93,12 @@ OP8     DB  0BAh,'8 - NOT',28 DUP (),0BAh,'$'
         JE M0              ;
         MAUX1:             ; Segmento auxiliar da multiplicação 1
             SHR BL,1       ; Desloca o ultimo bit do multiplicador(BL) para direita, jogando em CF
-            JC MAUX2       ; Se CF for 1, jump para AUX1, se ñ segue o codigo
-            SHL BH,1       ; Desloca BH uma casa para direita 
+            JC MAUX2       ; Se CF for 1, jump para MAUX2, se ñ segue o codigo
+            SHL BH,1       ; Desloca BH uma casa para direita, multiplicando por 2 
             JMP MAUX1      ;
         MAUX2:             ; Segmento auxiliar da multiplicação 2
             ADD CH,BH      ; Adiciona o Numerador(BH) no produto(CH)
-            SHL BH,1       ;    
+            SHL BH,1       ; Desloca BH uma casa para direita, multiplicando por 2   
             CMP BL,0       ; Enquanto o Multiplicador(BL) nao for zero, ñ pula para o resultado
             JNE MAUX1      ;
             MOV BH, CH     ; Joga o produto em BH, para ser processado pelo RESULT

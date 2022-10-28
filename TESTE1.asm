@@ -2,15 +2,21 @@ TITLE Guilherme Roelli (22899140) & Vitor Yuzo Takei (22023740)
 .MODEL SMALL
 .CODE
     MAIN PROC
-        MOV AH,01h
-        INT 21h
-        MOV BL,AL
-        MOV AH,02h
-        MOV DL,10
-        INT 21h
-        MOV AH,02h
-        MOV DL,BL
+       MOV CX,4
+       MOV AH,01h
+       INT 21H
+    ID1:
+        CMP AL,0Dh
+        JE FIM
+        AND AL,0Fh
+        MOV DX,10
+        MUL DX
+        ADD BX,AL
+        XOR AL,AL
+
+        
         INT 21H
+        LOOP ID1
 
     FIM:
     MOV AH,4Ch         
