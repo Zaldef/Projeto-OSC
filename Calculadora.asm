@@ -8,12 +8,14 @@ LAYOUT3 DB  10,0CCh,35 DUP (0CDh),0B9H,'$'
 LAYOUT4 DB  8 DUP (),0BAh,10,0C8h,35 DUP (0CDh),0BCh,'$'
 LAYOUT5 DB  18 DUP (),0BAh,10,0CCh,35 DUP (0CDh),0B9H,'$'
 LAYOUT6 DB  8 DUP (),0BAh,10,0CCh,35 DUP (0CDh),0B9H,'$'
+LAYOUT7 DB  23 DUP (),0BAh,10,0CCh,35 DUP (0CDh),0B9H,'$'
 DIG1	DB	10,0BAh,'Digite o primeiro n',0A3H,'mero (0-9): $'
 DIG2	DB	,,0BAh,10,0BAh,'Digite o segundo n',0A3H,'mero (0-9): $'
 MSG1    DB  10,0BAh,'Escolha a opera',87h,'ao;',16 DUP (),0BAh,10,'$'
 MSG2    DB  10,0BAh,'O resultado ',82h,': $'
 MSG3    DB  10,0BAh,'Deseja continuar (S / N): $'
 MSG4    DB  10,0BAh,0A5H,,82h,' possivel dividir por 0 $'
+MSG5    DB  19 DUP (),0BAh,10,0BAH,'O resto ',82h,': $'
 OP1     DB  0BAh,'1 - Adi',87h,'ao', 25 DUP (),0BAh,10,'$'
 OP2     DB  0BAh,'2 - Subtra',87h,'ao',22 DUP (),0BAh,10,'$'
 OP3     DB  0BAh,'3 - Multiplica',87h,'ao',18 DUP (),0BAh,10,'$'
@@ -112,24 +114,37 @@ OP8     DB  0BAh,'8 - NOT',28 DUP (),0BAh,'$'
         CMP BL,0           ; Se o divisor(BL) for 0, jump para "D0"
         JE D0              ;
         DAUX1:             ;
-            SHL BH,4       ;
-            SHL BL,4       ;
-        DAUX2:             ;
             CMP BH,BL      ;
-            JAE DAUX3      ;
-            JB DAUX4       ;
-            JMP DAUX2      ;
-        DAUX3:             ;
+            JAE DAUX2      ;
+            JB DAUX3       ;
+            JMP DAUX1      ;
+        DAUX2:             ;
             SUB BH,BL      ;
             ADD CL, 1      ;
-            JMP DAUX2      ;
-            CMP BH,0       ;
-            JE DAUX4       ;  
-            JMP DAUX2      ;
-        DAUX4:             ;
-            MOV BL,BH      ;
-            MOV BH,CL      ;
-            JMP RESULT     ;
+            JMP DAUX1      ;
+        DAUX3: 
+            LEA DX,LAYOUT3 ;
+            CALL PRINT     ; Vai formatar a "moldura" da calculadora
+            LEA DX,MSG2    ;         
+            CALL PRINT     ; Printa a MSG2
+
+            XOR AX,AX      ; Zera o registrador AX para ser utilizado 
+
+            MOV DL,CL      ;
+            OR  DL,30h     ; 
+            MOV AH,02h     ;
+            INT 21h        ; Converte para caracter e imprime o primeiro digito
+
+            LEA DX,MSG5    ;         
+            CALL PRINT     ; Printa a MSG5
+
+            MOV DL,BH      ;
+            OR  DL,30h     ;   
+            MOV AH,02h   
+            INT 21h        ; Converte para caracter e imprime o resto
+            LEA DX,LAYOUT7     ;
+            CALL PRINT         ; Vai formatar a "moldura" da calculadora
+            JMP FIM        ;
         D0:                ;
             LEA DX, LAYOUT3;
             CALL PRINT     ;
