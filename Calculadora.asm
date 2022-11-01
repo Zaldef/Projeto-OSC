@@ -22,8 +22,7 @@ OP3     DB  0BAh,'3 - Multiplica',87h,'ao',18 DUP (),0BAh,10,'$'
 OP4     DB  0BAh,'4 - Divisao',24 DUP (),0BAh,10,'$'
 OP5     DB  0BAh,'5 - AND',28 DUP (),0BAh,10,'$'
 OP6     DB  0BAh,'6 - OR',29 DUP (),0BAh,10,'$'
-OP7     DB  0BAh,'7 - XOR',28 DUP (),0BAh,10,'$'
-OP8     DB  0BAh,'8 - NOT',28 DUP (),0BAh,'$'
+OP7     DB  0BAh,'7 - XOR',28 DUP (),0BAh,'$'
 
 .CODE
     MAIN PROC
@@ -63,8 +62,6 @@ OP8     DB  0BAh,'8 - NOT',28 DUP (),0BAh,'$'
         LEA DX,OP6         ; OR
         CALL PRINT         ;
         LEA DX,OP7         ; XOR
-        CALL PRINT         ;
-        LEA DX,OP8         ; NOT
         CALL PRINT         ; Tela inical, qual operação escolher
 
         MOV AH,08h         ;
@@ -227,8 +224,6 @@ OP8     DB  0BAh,'8 - NOT',28 DUP (),0BAh,'$'
         JE OR              ;
         CMP AL,37h         ;
         JE XOR             ;
-        CMP AL,38h         ;
-        JE NOT 
         AND:
             AND BH,BL          ;
             RET                ; Operação AND
@@ -238,9 +233,6 @@ OP8     DB  0BAh,'8 - NOT',28 DUP (),0BAh,'$'
         XOR:
             XOR BH,BL      ;
             RET            ; Operação XOR
-        NOT:
-            NOT BH         ;
-            RET            ; Operação NOT
     LOGIC ENDP
   
     PRINT PROC             ; Procedimento para dar print na tela
