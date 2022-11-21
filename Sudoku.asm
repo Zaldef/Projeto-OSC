@@ -10,6 +10,12 @@ LINHA  DB 0BAH, 20H, '$'
 LINHA2 DB 0CCH, 8 DUP (3 DUP (0CDH), 0CEH), 3 DUP (0CDH), 0B9H , 10,'$'
  
 .CODE
+
+    PRINT MACRO MENSAGEM
+        LEA DX,MENSAGEM
+        MOV AH,09h         
+	    INT 21h 
+    ENDM
     MAIN PROC
         MOV AX,@DATA;
         MOV DS,AX   ; Inicia o segmento de dados
@@ -20,26 +26,18 @@ LINHA2 DB 0CCH, 8 DUP (3 DUP (0CDH), 0CEH), 3 DUP (0CDH), 0B9H , 10,'$'
         INT 21H
     MAIN ENDP
 
-    PRINT PROC             ; Procedimento para dar print na tela
-        MOV AH,09h         ;
-	    INT 21h            ;
-	    RET                ;
-    PRINT ENDP             ;
-
     MATRIZ_OUT PROC ; Proc para leitura e impressao de matriz
         XOR BX,BX
         XOR SI,SI
         
-        LEA DX, MOLDURA
-        CALL PRINT
+        PRINT MOLDURA
 
         MOV CL, LIN             ; Usado como contador de linhas    
 
         OUT1:                           ;   
             MOV CH, COL                 ; Usado como contador de colunas  
             OUT2:                       ; 
-                LEA DX,LINHA
-                CALL PRINT 
+                PRINT LINHA
                 MOV AH, 02h  
                 MOV DL, MATRIZ[BX][SI]  ; Copia a informacao da matriz para DL(entrada padrao para função 02h)  
                 OR DL, 30h              ; Converte para caracter
@@ -53,8 +51,7 @@ LINHA2 DB 0CCH, 8 DUP (3 DUP (0CDH), 0CEH), 3 DUP (0CDH), 0B9H , 10,'$'
             INT 21H
             MOV DL, 10              ; 
             INT 21h                 ; LINE FEED
-            LEA DX,LINHA2
-            CALL PRINT  
+            PRINT LINHA2  
             ADD BX, LIN             ; Desloca uma linha na matriz  
             XOR SI,SI               ; Reseta as colunas
             DEC CL                  ;   
