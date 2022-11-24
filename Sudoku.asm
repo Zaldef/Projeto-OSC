@@ -7,6 +7,8 @@ COL  EQU  9
     MATRIZ DB LIN DUP(COL DUP(?))
 MOLDURA DB 201,2 DUP(11 DUP (205),203),11 DUP (205),187,'$'
 LINHA DB 10,13,3 DUP(186,32,2 DUP (196),197, 3 DUP (196), 197, 2 DUP (196),32),186, '$'
+LINHA2 DB 10,13,204,2 DUP(11 DUP (205),206),11 DUP (205),185,'$'
+LINHA3 DB 10,13,200,2 DUP(11 DUP (205),202),11 DUP (205),188,'$'
  
 .CODE
     PRINT MACRO MENSAGEM
@@ -27,7 +29,10 @@ LINHA DB 10,13,3 DUP(186,32,2 DUP (196),197, 3 DUP (196), 197, 2 DUP (196),32),1
         MOV DL,186
         INT 21h
     ENDM
-
+    BARRASIMPLES MACRO 
+        MOV DL,179
+        INT 21h
+    ENDM
     SPACE MACRO
         MOV DL,32
         INT 21h
@@ -52,67 +57,60 @@ LINHA DB 10,13,3 DUP(186,32,2 DUP (196),197, 3 DUP (196), 197, 2 DUP (196),32),1
         XOR BX,BX
         XOR SI,SI
         PRINT MOLDURA
-        ADD CX, 3
+        MOV CX,3
         PUSH CX
-            OUT3:
-                MOV CH, 3
+        OUT4:
+        XOR CL,CL
+        ADD CH,3
+        ADD CL,3
+        LFCR
+        BARRADUPLA
+        JMP OUT3
+        OUT1:
+            ADD CL, 3
+            ADD BX,COL
+            XOR SI,SI
+            PRINT LINHA
+            LFCR
+            BARRADUPLA
+            JMP OUT3
+            OUT2:
                 LFCR
-                BARRADUPLA
-                OUT2:
-                    MOV CL,2
-                        OUT1:
-                            SPACE
-                            PRINTMATRIZ
-                            SPACE
-                            MOV DL,179
-                            INT 21h
-                        DEC CL                   
-                        JNZ OUT1
+                OUT3:
+                    SPACE
+                    PRINTMATRIZ
+                    SPACE
+                    BARRASIMPLES
+                    SPACE
+                    PRINTMATRIZ
+                    SPACE
+                    BARRASIMPLES
                     SPACE
                     PRINTMATRIZ
                     SPACE
                     BARRADUPLA
-                DEC CH                   
-                JNZ OUT2
-                POP CX
-                PRINT LINHA
-                XOR SI,SI
-                ADD BX,COL
             DEC CL
-            PUSH CX                   
-            JNZ OUT3
-            POP CX
-            ADD CX, 3
-            PUSH CX
-            OUT4:
-                MOV CH, 3
-                LFCR
-                BARRADUPLA
-                OUT5:
-                    MOV CL,2
-                        OUT6:
-                            SPACE
-                            PRINTMATRIZ
-                            SPACE
-                            MOV DL,179
-                            INT 21h
-                        DEC CL                   
-                        JNZ OUT6
-                    SPACE
-                    PRINTMATRIZ
-                    SPACE
-                    BARRADUPLA
-                DEC CH                   
-                JNZ OUT5
-                POP CX
-                PRINT LINHA
-                XOR SI,SI
-                ADD BX,COL
-            DEC CL
-            PUSH CX                   
-            JNZ OUT4
- 
+            JNZ OUT3           
+        DEC CH
+        JNZ OUT1
+        ADD BX,COL
+        XOR SI,SI
+        POP CX
+        CMP CX, 1
+        JNE OUT5
+        PRINT LINHA3
+        JMP OUT6
+        OUT5: 
+        PRINT LINHA2
+        OUT6:
+        DEC CX
+        PUSH CX
+        JNZ RESTART
+        POP CX
+
         RET
+        RESTART:
+        JMP OUT4
     MATRIZ_OUT ENDP
 
     
