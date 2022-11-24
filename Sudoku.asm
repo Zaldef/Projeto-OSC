@@ -1,63 +1,121 @@
-TITLE ENTRADA E E SAIDA DE MATRIZ, INVERSAO DE LINHAS POR COLUNAS
+TITLE SUDOKU Guilherme Bernardini Roelli (22899140) & Vitor Yuzo Takei (22023740)
 .MODEL SMALL
 .STACK 100h
 .DATA
 LIN  EQU  9
 COL  EQU  9
     MATRIZ DB LIN DUP(COL DUP(?))
-MOLDURA DB 0C9H, 8 DUP (3 DUP (0CDH), 0CBH), 3 DUP (0CDH), 0BBH , 10,'$'
-LINHA  DB 0BAH, 20H, '$'
-LINHA2 DB 0CCH, 8 DUP (3 DUP (0CDH), 0CEH), 3 DUP (0CDH), 0B9H , 10,'$'
+MOLDURA DB 201,2 DUP(11 DUP (205),203),11 DUP (205),187,'$'
+LINHA DB 10,13,3 DUP(186,32,2 DUP (196),197, 3 DUP (196), 197, 2 DUP (196),32),186, '$'
  
 .CODE
-
     PRINT MACRO MENSAGEM
         LEA DX,MENSAGEM
         MOV AH,09h         
 	    INT 21h 
     ENDM
+
+    LFCR MACRO 
+        MOV AH,02
+        MOV DL,10
+        INT 21h
+        MOV DL,13
+        INT 21h  
+    ENDM
+    
+    BARRADUPLA MACRO
+        MOV DL,186
+        INT 21h
+    ENDM
+
+    SPACE MACRO
+        MOV DL,32
+        INT 21h
+    ENDM
+    PRINTMATRIZ MACRO
+        MOV DL, MATRIZ[BX][SI]
+        OR DL,30h
+        INT 21h
+        INC SI
+    ENDM
     MAIN PROC
         MOV AX,@DATA;
         MOV DS,AX   ; Inicia o segmento de dados
         CALL FACIL
-       CALL MATRIZ_OUT
+        CALL MATRIZ_OUT
     FIM:
         MOV AH,4CH
-        INT 21H
+        INT 21h
     MAIN ENDP
 
-    MATRIZ_OUT PROC ; Proc para leitura e impressao de matriz
+    MATRIZ_OUT PROC
         XOR BX,BX
         XOR SI,SI
-        
         PRINT MOLDURA
-
-        MOV CL, LIN             ; Usado como contador de linhas    
-
-        OUT1:                           ;   
-            MOV CH, COL                 ; Usado como contador de colunas  
-            OUT2:                       ; 
+        ADD CX, 3
+        PUSH CX
+            OUT3:
+                MOV CH, 3
+                LFCR
+                BARRADUPLA
+                OUT2:
+                    MOV CL,2
+                        OUT1:
+                            SPACE
+                            PRINTMATRIZ
+                            SPACE
+                            MOV DL,179
+                            INT 21h
+                        DEC CL                   
+                        JNZ OUT1
+                    SPACE
+                    PRINTMATRIZ
+                    SPACE
+                    BARRADUPLA
+                DEC CH                   
+                JNZ OUT2
+                POP CX
                 PRINT LINHA
-                MOV AH, 02h  
-                MOV DL, MATRIZ[BX][SI]  ; Copia a informacao da matriz para DL(entrada padrao para função 02h)  
-                OR DL, 30h              ; Converte para caracter
-                INT 21h                 ;   
-                MOV DL, 20H
-                INT 21H             
-                INC SI                  ; Atualiza o endereço da matriz, deslocando para a proxima coluna  
-                DEC CH                  ;   
-            JNZ OUT2                ; LOOP1
-            MOV DL, 0BAH
-            INT 21H
-            MOV DL, 10              ; 
-            INT 21h                 ; LINE FEED
-            PRINT LINHA2  
-            ADD BX, LIN             ; Desloca uma linha na matriz  
-            XOR SI,SI               ; Reseta as colunas
-            DEC CL                  ;   
-        JNZ OUT1                ; LOOP2 (nao utilizado LOOP, pois estamos utilizando CX para outro "loop" temos um loop1 dentro do outro loop2)
+                XOR SI,SI
+                ADD BX,COL
+            DEC CL
+            PUSH CX                   
+            JNZ OUT3
+            POP CX
+            ADD CX, 3
+            PUSH CX
+            OUT4:
+                MOV CH, 3
+                LFCR
+                BARRADUPLA
+                OUT5:
+                    MOV CL,2
+                        OUT6:
+                            SPACE
+                            PRINTMATRIZ
+                            SPACE
+                            MOV DL,179
+                            INT 21h
+                        DEC CL                   
+                        JNZ OUT6
+                    SPACE
+                    PRINTMATRIZ
+                    SPACE
+                    BARRADUPLA
+                DEC CH                   
+                JNZ OUT5
+                POP CX
+                PRINT LINHA
+                XOR SI,SI
+                ADD BX,COL
+            DEC CL
+            PUSH CX                   
+            JNZ OUT4
+ 
         RET
     MATRIZ_OUT ENDP
+
+    
 
     FACIL PROC
         XOR BX,BX
