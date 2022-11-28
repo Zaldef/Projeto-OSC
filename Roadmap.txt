@@ -1,0 +1,2 @@
+Fazer logica para conferencia de numeros, inbutido com um loop
+tela final
