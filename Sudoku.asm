@@ -1,14 +1,14 @@
-TITLE SUDOKU Guilherme Bernardini Roelli (22899140) & Vitor Yuzo Takei (22023740)
+TITLE SUDOKU Guilherme Bernardini Roelli (22899140)
 .MODEL SMALL
 .STACK 100h
 .DATA
-LIN  EQU  9
-COL  EQU  9
-    MATRIZ DB LIN DUP(COL DUP(?))
-MOLDURA     DB 201,2 DUP(11 DUP (205),203),11 DUP (205),187,'$'
+LIN         EQU  9
+COL         EQU  9
+MATRIZ      DB LIN DUP(COL DUP(?))
+MOLDURA     DB 10,13,201,2 DUP(11 DUP (205),203),11 DUP (205),187,'$'
 LINHA1      DB 10,13,3 DUP(186,32,2 DUP (196),197, 3 DUP (196), 197, 2 DUP (196),32),186, '$'
 LINHA2      DB 10,13,204,2 DUP(11 DUP (205),206),11 DUP (205),185,'$'
-LINHA3      DB 10,13,200,2 DUP(11 DUP (205),202),11 DUP (205),188,'$'
+LINHA3      DB 10,13,200,2 DUP(11 DUP (205),202),11 DUP (205),188,10,13,'$'
 TELA1       DB 10,201,78 DUP(205),187,'$'
 TELA2       DB 204,38 DUP(205),203,39 DUP(205),185,'$'
 TELA3       DB 204,38 DUP(205),202,39 DUP(205),185,'$'
@@ -29,60 +29,66 @@ MSG11       DB 186,38 DUP(32),186,'tanto em linhas, colunas e quadrantes.',32,18
 COMOJOGAR1  DB 186,33 DUP(32),'COMO JOGAR:',34 DUP(32),186,'$'
 COMOJOGAR2  DB 186,' Primeiro se desloque ate a casa que pretende preencher atraves de WASD:      ',186,'$'
 COMOJOGAR3  DB 186,'A - desloca uma coluna para a esquerda, D - desloca uma coluna para esquerda  ',186,'$'
-COMOJOGAR4  DB 186,'W - desloca uma linha para cima, S - desloca uma linha para baixo.            ',186,'$' 
+COMOJOGAR4  DB 186,'W - desloca uma linha para cima, S - desloca uma linha para baixo.            ',186,'$'
 COMOJOGAR5  DB 186,'Depois aperte ENTER para entrar com o n',163,'mero que deve ser de 1-9              ',186,'$'
 COMOJOGAR6  DB 186,'apos isso, repita o processo at',130,' completar o sudoku. Uma mensagem sera exibida',186,'$'
 COMOJOGAR7  DB 186,'quando ele for completado corretamente, indicando que voc',136,' ganhou!            ',186,'$'
 DIFICULDADE DB 186,'QUAL DIFICULADE VOCE QUER? 1-FACIL 2-MEDIO 3-DIFICIL                          ',186,'$'
+ENTRADA1    DB 'SE DESLOQUE ATE A CASA: $'
+ENTRADA2    DB 'DIGITE O NUMERO: $'
+ERRO        DB 10,13,'ALGO DE ERRADO ACONTECEU, TENTE NOVAMENTE :) $'
 
  
 .CODE
     PRINT MACRO MENSAGEM
         LEA DX,MENSAGEM
-        MOV AH,09h         
-	    INT 21h 
+        MOV AH,09h
+	    INT 21h
     ENDM
-    LFCR MACRO ; PULA LINHA1
+    LFCR MACRO; PULA LINHA
         MOV AH,02
         MOV DL,10
         INT 21h
         MOV DL,13
         INT 21h  
     ENDM 
-    BARRADUPLA MACRO ; IMPRIMIR ║ 
+    BARRADUPLA MACRO; IMPRIMIR "║"
         MOV DL,186
         INT 21h
     ENDM
-    BARRASIMPLES MACRO ; IMPRIMIR │
+    BARRASIMPLES MACRO; IMPRIMIR "│"
         MOV DL,179
         INT 21h
     ENDM
-    SPACE MACRO 
+    SPACE MACRO
         MOV DL,32
         INT 21h
     ENDM
-    PRINTMATRIZ MACRO 
+    PRINTMATRIZ MACRO
         MOV DL, MATRIZ[BX][SI]
         OR DL,30h
         INT 21h
         INC SI
     ENDM
 
-
-
     MAIN PROC
         MOV AX,@DATA;
         MOV DS,AX   ; Inicia o segmento de dados
         CALL TELAINICIAL
-        CALL MATRIZ_OUT
+        LOOP_MAIN:
+        CALL SAIDA
+        CALL ENTRADA 
+        CALL LOGICA
+        CMP DL, 18
+        JNE LOOP_MAIN
         PRINT TELA1
         PRINT TELA6
         PRINT TELA6
         PRINT TELA6
         PRINT TELA5
 
-        CALL ENTRADA 
-        CALL MATRIZ_OUT
+
+        CALL SAIDA
 
         LFCR
         MOV AH,07
@@ -93,7 +99,7 @@ DIFICULDADE DB 186,'QUAL DIFICULADE VOCE QUER? 1-FACIL 2-MEDIO 3-DIFICIL        
         INT 21h
     MAIN ENDP
 
-    MATRIZ_OUT PROC
+    SAIDA PROC; IMPRESSAO DA MATRIZ NA TELA
         XOR BX,BX   ; ZERANDO REGISTRADORES PARA SEREM UTILIZADOS
         XOR SI,SI   ; ZERANDO REGISTRADORES PARA SEREM UTILIZADOS
         PRINT MOLDURA
@@ -135,7 +141,7 @@ DIFICULDADE DB 186,'QUAL DIFICULADE VOCE QUER? 1-FACIL 2-MEDIO 3-DIFICIL        
         POP CX      ; RESGATA A QUANTIDADE DE QUADRANTES VERTICAIS A SEREM IMPRESSOS
         CMP CX, 1   ;
             JNE OUT1    ; 
-            PRINT LINHA3; LINHA1 EXTERNA(MOLDURA)
+            PRINT LINHA3; LINHA EXTERNA(MOLDURA)
             JMP OUT2    ;
         OUT1:       ; 
             PRINT LINHA2; LINHAS INTERNAS(MOLDURA)
@@ -147,9 +153,8 @@ DIFICULDADE DB 186,'QUAL DIFICULADE VOCE QUER? 1-FACIL 2-MEDIO 3-DIFICIL        
         RET
         RESTART:
         JMP QUADRANTE_VERTICAL
-    MATRIZ_OUT ENDP
-
-    TELAINICIAL PROC ; PROC com as informacoes sobre o sudoku e a escolha de dificuldade
+    SAIDA ENDP
+    TELAINICIAL PROC; PROC com as informacoes sobre o sudoku e a escolha de dificuldade
         PRINT TELA1
         PRINT MSG1
         PRINT TELA2
@@ -189,11 +194,14 @@ DIFICULDADE DB 186,'QUAL DIFICULADE VOCE QUER? 1-FACIL 2-MEDIO 3-DIFICIL        
         DIF_EXIT:
         RET
     TELAINICIAL ENDP
-
-    ENTRADA PROC
+    ENTRADA PROC; ENTRADA DE NUMEROS DENTRO DA MATRIZ(SUDOKU
+        LFCR
+        LFCR
+        LFCR
         XOR BX,BX
         XOR SI,SI
 
+        PRINT ENTRADA1
         IN_1:
         MOV AH,01
         INT 21h
@@ -222,6 +230,7 @@ DIFICULDADE DB 186,'QUAL DIFICULADE VOCE QUER? 1-FACIL 2-MEDIO 3-DIFICIL        
             INC SI
             JMP IN_1
         IN_2:
+        PRINT ENTRADA2
         MOV AH,01
         INT 21h
         CMP AL, '0' 
@@ -230,12 +239,79 @@ DIFICULDADE DB 186,'QUAL DIFICULADE VOCE QUER? 1-FACIL 2-MEDIO 3-DIFICIL        
         JG IN_ERRO 
         AND AL,0Fh 
         MOV MATRIZ [BX][SI],AL
+        JMP FIM_E
 
         IN_ERRO:
+        LFCR
+        LFCR
+        LFCR
+        LFCR
+        PRINT ERRO
+        FIM_E:
        RET 
     ENTRADA ENDP
+    LOGICA PROC; ESSE PROC VAI ANALISAR LINHA/COLUNA/QUADRANTE PARA VER SE ESTA CERTO OS NUMEROS ATRAVES DA SOMA DELES
+        XOR DX,DX   ;
+        XOR BX,BX   ;
+        XOR SI,SI   ;
+        XOR CX,CX   ; ZERA REGISTRADORES PARA SEREM UTILIZADOS
+        MOV CH,LIN 	; QUANTIDADE DE LINHAS PARA VERIFICAÇÃO
+        LINHA_L2:   ; DESLOCAMENTO DE LINHA
+            XOR AX,AX   ; ZERA REGISTRADOR PARA SER UTILIZADO
+            MOV CL,COL  ; QUANTIDADE DE COLUNAS PARA VERIFICAÇÃO
+            LINHA_L1: ; DESLOCAMENTO DE COLUNA
+                CMP MATRIZ[BX][SI],0    ;
+                JE FIM_L                ; ANALISA SE É ZERO, SE FOR PULA PARA FIM, SE Ñ SEGUE COM A LOGICA
+                ADD AL, MATRIZ[BX][SI]  ;
+                INC SI                  ; ACUMULA O NUMERO EM AL, PARA SER REALIZADO UMA VERIFICAÇÃO
+                DEC CL      ;
+            JNZ LINHA_L1    ; LOOP LINHA_L1
+            ADD DH,AL
+            CMP AL,45
+            JE LINHA_OK
+            LINHA_V:
+            XOR SI,SI
+            ADD BX, LIN
+            DEC CH
+        JNZ LINHA_L2
+             
+        XOR BX,BX
+        XOR SI,SI
+        XOR CX,CX
+        MOV CX,COL  ; QUANTIDADE DE COLUNAS PARA VERIFICAÇÃO
+        COLUNA_L2:
+            XOR AX,AX
+            MOV CL,LIN
+            COLUNA_L1:
+                ;CMP MATRIZ[BX][SI],0
+                ;JE FIM_L
+                ADD AL, MATRIZ[BX][SI]
+                ADD BX, COL
+                DEC CL
+            JNZ COLUNA_L1
+            ADD DH,AL
+            CMP AL,45
+            JE COLUNA_OK
+            COLUNA_V:
+            XOR BX,BX
+            INC SI
+            DEC CH
+        JNZ COLUNA_L2
+        JMP FIM_L
+            
+        LINHA_OK:
+        INC DL
+        JMP LINHA_V
 
-    FACIL PROC
+        COLUNA_OK:
+        INC DL
+        JMP COLUNA_V
+
+        FIM_L:
+        XOR CX,CX
+        RET
+    LOGICA ENDP
+    FACIL PROC; DIFICULDADE (PREENCHIMENTO DA MATRIZ(SUDOKU))
         XOR BX,BX
         XOR SI,SI
             MOV SI,2
@@ -327,8 +403,7 @@ DIFICULDADE DB 186,'QUAL DIFICULADE VOCE QUER? 1-FACIL 2-MEDIO 3-DIFICIL        
             MOV MATRIZ [BX][SI],1 
         RET  
     FACIL ENDP
-
-    MEDIO PROC  
+    MEDIO PROC; DIFICULDADE (PREENCHIMENTO DA MATRIZ(SUDOKU))
         XOR BX,BX
         XOR SI,SI
             INC SI
@@ -393,8 +468,7 @@ DIFICULDADE DB 186,'QUAL DIFICULADE VOCE QUER? 1-FACIL 2-MEDIO 3-DIFICIL        
             MOV MATRIZ [BX][SI],8
         RET
     MEDIO ENDP
-
-    DIFICIL PROC
+    DIFICIL PROC; DIFICULDADE (PREENCHIMENTO DA MATRIZ(SUDOKU))
     RET
     DIFICIL ENDP
 END MAIN
