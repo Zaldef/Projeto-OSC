@@ -5,6 +5,9 @@ TITLE SUDOKU Guilherme Bernardini Roelli (22899140)
 LIN         EQU  9
 COL         EQU  9
 MATRIZ      DB LIN DUP(COL DUP(?))
+
+MATRIZ2      DB LIN DUP(COL DUP(?))
+
 MOLDURA     DB 10,13,201,2 DUP(11 DUP (205),203),11 DUP (205),187,'$'
 LINHA1      DB 10,13,3 DUP(186,32,2 DUP (196),197, 3 DUP (196), 197, 2 DUP (196),32),186, '$'
 LINHA2      DB 10,13,204,2 DUP(11 DUP (205),206),11 DUP (205),185,'$'
@@ -75,17 +78,18 @@ ERRO        DB 10,13,'ALGO DE ERRADO ACONTECEU, TENTE NOVAMENTE :) $'
         MOV AX,@DATA;
         MOV DS,AX   ; Inicia o segmento de dados
         CALL TELAINICIAL
-        LOOP_MAIN:
+    LOOP_MAIN:
         CALL SAIDA
         CALL ENTRADA 
-        CALL LOGICA
-        CMP DL, 18
-        JNE LOOP_MAIN
-        PRINT TELA1
-        PRINT TELA6
-        PRINT TELA6
-        PRINT TELA6
-        PRINT TELA5  
+        call saida
+        ;CALL LOGICA
+        ;CMP DL, 18
+        ;JNE LOOP_MAIN
+       ; PRINT TELA1
+       ; PRINT TELA6
+       ; PRINT TELA6
+       ; PRINT TELA6
+        ;PRINT TELA5  
     FIM:
         MOV AH,4CH
         INT 21h
@@ -203,8 +207,8 @@ ERRO        DB 10,13,'ALGO DE ERRADO ACONTECEU, TENTE NOVAMENTE :) $'
         XOR BX,BX
         XOR SI,SI
 
-        PRINT ENTRADA1
-        IN_1:
+        PRINT ENTRADA1; DEFINIR LIMITES
+        IN_1: 
         MOV AH,01
         INT 21h
         CMP AL,13
@@ -232,6 +236,14 @@ ERRO        DB 10,13,'ALGO DE ERRADO ACONTECEU, TENTE NOVAMENTE :) $'
             INC SI
             JMP IN_1
         IN_2:
+        CMP BX, 72
+        JG IN_ERRO
+        CMP BX, 0
+        JL IN_ERRO
+        CMP SI, 8
+        JG IN_ERRO
+        CMP SI, 0
+        JL IN_ERRO
         PRINT ENTRADA2
         MOV AH,01
         INT 21h
@@ -253,71 +265,13 @@ ERRO        DB 10,13,'ALGO DE ERRADO ACONTECEU, TENTE NOVAMENTE :) $'
        RET 
     ENTRADA ENDP
     LOGICA PROC; ESSE PROC VAI ANALISAR LINHA/COLUNA/QUADRANTE PARA VER SE ESTA CERTO OS NUMEROS ATRAVES DA SOMA DELES
-        XOR DX,DX   ;
-        XOR BX,BX   ;
-        XOR SI,SI   ;
-        XOR CX,CX   ; ZERA REGISTRADORES PARA SEREM UTILIZADOS
-        MOV CH,LIN 	; QUANTIDADE DE LINHAS PARA VERIFICAÇÃO
-        LINHA_L2:   ; DESLOCAMENTO DE LINHA
-            XOR AX,AX   ; ZERA REGISTRADOR PARA SER UTILIZADO
-            MOV CL,COL  ; QUANTIDADE DE COLUNAS PARA VERIFICAÇÃO
-            LINHA_L1: ; DESLOCAMENTO DE COLUNA
-                CMP MATRIZ[BX][SI],0    ;
-                JE FIM_L                ; ANALISA SE É ZERO, SE FOR PULA PARA FIM, SE Ñ SEGUE COM A LOGICA
-                ADD AL, MATRIZ[BX][SI]  ;
-                INC SI                  ; ACUMULA O NUMERO EM AL, PARA SER REALIZADO UMA VERIFICAÇÃO
-                DEC CL      ;
-            JNZ LINHA_L1    ; LOOP LINHA_L1
-            ADD DH,AL
-            CMP AL,45
-            JE LINHA_OK
-            LINHA_V:
-            XOR SI,SI
-            ADD BX, LIN
-            DEC CH
-        JNZ LINHA_L2
-             
-        XOR BX,BX
-        XOR SI,SI
-        XOR CX,CX
-        MOV CX,COL  ; QUANTIDADE DE COLUNAS PARA VERIFICAÇÃO
-        COLUNA_L2:
-            XOR AX,AX
-            MOV CL,LIN
-            COLUNA_L1:
-                CMP MATRIZ[BX][SI],0
-                JE FIM_L
-                ADD AL, MATRIZ[BX][SI]
-                ADD BX, COL
-                DEC CL
-            JNZ COLUNA_L1
-            ADD DH,AL
-            CMP AL,45
-            JE COLUNA_OK
-            COLUNA_V:
-            XOR BX,BX
-            INC SI
-            DEC CH
-        JNZ COLUNA_L2
-        JMP FIM_L
-            
-        LINHA_OK:
-        INC DL
-        JMP LINHA_V
-
-        COLUNA_OK:
-        INC DL
-        JMP COLUNA_V
-
-        FIM_L:
-        XOR CX,CX
-        RET
+       RET
     LOGICA ENDP
     TELAFINAL PROC
         
     TELAFINAL ENDP
     FACIL PROC; DIFICULDADE (PREENCHIMENTO DA MATRIZ(SUDOKU))
-        XOR BX,BX
+        XOR BX,BX   ; SUDOKU INCOMPLETO RESPOSTA
         XOR SI,SI
             MOV SI,2
             MOV MATRIZ [BX][SI],2
@@ -405,7 +359,188 @@ ERRO        DB 10,13,'ALGO DE ERRADO ACONTECEU, TENTE NOVAMENTE :) $'
             ADD SI,3
             MOV MATRIZ [BX][SI],2
             INC SI
-            MOV MATRIZ [BX][SI],1 
+            MOV MATRIZ [BX][SI],1
+            ; SUDOKU COMPLETO (RESPOSTA)
+            XOR BX,BX
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI
+            ADD BX, COL
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+            ADD BX, COL
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+            ADD BX, COL
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI
+            ADD BX, COL
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI
+            ADD BX, COL
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI
+            ADD BX, COL
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI
+            ADD BX, COL
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI
+            ADD BX, COL
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI
         RET  
     FACIL ENDP
     MEDIO PROC; DIFICULDADE (PREENCHIMENTO DA MATRIZ(SUDOKU))
@@ -471,6 +606,189 @@ ERRO        DB 10,13,'ALGO DE ERRADO ACONTECEU, TENTE NOVAMENTE :) $'
             MOV MATRIZ [BX][SI],2
             INC SI
             MOV MATRIZ [BX][SI],8
+            ADD BX, COL
+            XOR SI,SI
+        ; SUDOKU COMPLETO(resposta)
+            XOR BX,BX
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+            ADD BX,COL
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+            ADD BX,COL
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI 
+            ADD BX,COL
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI 
+            ADD BX,COL
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI 
+            ADD BX,COL
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI 
+            ADD BX,COL
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI 
+            ADD BX,COL
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI 
+            ADD BX,COL
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI 
         RET
     MEDIO ENDP
     DIFICIL PROC; DIFICULDADE (PREENCHIMENTO DA MATRIZ(SUDOKU))
