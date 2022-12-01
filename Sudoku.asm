@@ -385,6 +385,7 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
             MOV MATRIZ [BX][SI],2
             INC SI
             MOV MATRIZ [BX][SI],1
+
             ; SUDOKU COMPLETO (RESPOSTA)
             XOR BX,BX
             XOR SI,SI
@@ -633,6 +634,7 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
             MOV MATRIZ [BX][SI],8
             ADD BX, COL
             XOR SI,SI
+
         ; SUDOKU COMPLETO(resposta)
             XOR BX,BX
             XOR SI,SI
@@ -817,6 +819,72 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
         RET
     MEDIO ENDP
     DIFICIL PROC; DIFICULDADE (PREENCHIMENTO DA MATRIZ(SUDOKU))
+    XOR BX,BX
+    XOR SI,SI
+        ADD SI,4
+        MOV MATRIZ [BX][SI],6
+    ADD BX,COL
+    XOR SI,SI
+        MOV MATRIZ [BX][SI],9
+        ADD SI,6
+        MOV MATRIZ [BX][SI],6
+        INC SI
+        MOV MATRIZ [BX][SI],5
+    ADD BX,COL
+    XOR SI,SI 
+        ADD SI,3
+        MOV MATRIZ [BX][SI],7
+        ADD SI,2
+        MOV MATRIZ [BX][SI],5 
+    ADD BX,COL
+    XOR SI,SI 
+        INC SI
+        MOV MATRIZ [BX][SI],7
+        ADD SI,2
+        MOV MATRIZ [BX][SI],5
+        ADD SI,4 
+        MOV MATRIZ [BX][SI],1
+        INC SI 
+        MOV MATRIZ [BX][SI],2
+    ADD BX,COL
+    XOR SI,SI 
+        INC SI
+        MOV MATRIZ [BX][SI],3
+        ADD SI,7
+        MOV MATRIZ [BX][SI],5
+    ADD BX,COL
+    XOR SI,SI 
+        MOV MATRIZ [BX][SI],1
+        ADD SI,3 
+        MOV MATRIZ [BX][SI],6
+        INC SI
+        MOV MATRIZ [BX][SI],9
+        INC SI
+        MOV MATRIZ [BX][SI],8
+        ADD SI,3 
+        MOV MATRIZ [BX][SI],7  
+    ADD BX,COL
+    XOR SI,SI 
+        MOV MATRIZ [BX][SI],6
+        INC SI 
+        MOV MATRIZ [BX][SI],9
+        ADD SI,4 
+        MOV MATRIZ [BX][SI],3
+    ADD BX,COL
+    XOR SI,SI 
+        MOV MATRIZ [BX][SI],5
+    ADD BX,COL
+    XOR SI,SI 
+        INC SI 
+        MOV MATRIZ [BX][SI],2
+        ADD SI,2 
+        MOV MATRIZ [BX][SI],1
+        ADD SI,5
+        MOV MATRIZ [BX][SI],3
+        
+    ; SUDOKU COMPLETO(resposta)
+        XOR BX,BX
+        XOR SI,SI
     RET
     DIFICIL ENDP
 END MAIN
