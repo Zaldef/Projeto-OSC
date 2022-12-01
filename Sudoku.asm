@@ -31,15 +31,19 @@ MSG10       DB 186,38 DUP(32),186,'1 a 9 e nao tiver nenhuma repeti',135,'ao    
 MSG11       DB 186,38 DUP(32),186,'tanto em linhas, colunas e quadrantes.',32,186,'$'
 COMOJOGAR1  DB 186,33 DUP(32),'COMO JOGAR:',34 DUP(32),186,'$'
 COMOJOGAR2  DB 186,' Primeiro se desloque ate a casa que pretende preencher atraves de WASD:      ',186,'$'
-COMOJOGAR3  DB 186,'A - desloca uma coluna para a esquerda, D - desloca uma coluna para esquerda  ',186,'$'
-COMOJOGAR4  DB 186,'W - desloca uma linha para cima, S - desloca uma linha para baixo.            ',186,'$'
+COMOJOGAR3  DB 186,'A -desloca uma coluna para a esquerda, D- desloca uma coluna para direita     ',186,'$'
+COMOJOGAR4  DB 186,'W -desloca uma linha para cima, S- desloca uma linha para baixo.Comeca em 1x1 ',186,'$'
 COMOJOGAR5  DB 186,'Depois aperte ENTER para entrar com o n',163,'mero que deve ser de 1-9              ',186,'$'
 COMOJOGAR6  DB 186,'apos isso, repita o processo at',130,' completar o sudoku. Uma mensagem sera exibida',186,'$'
 COMOJOGAR7  DB 186,'quando ele for completado corretamente, indicando que voc',136,' ganhou!            ',186,'$'
-DIFICULDADE DB 186,'QUAL DIFICULADE VOCE QUER? 1-FACIL 2-MEDIO 3-DIFICIL                          ',186,'$'
-ENTRADA1    DB 'SE DESLOQUE ATE A CASA: $'
+DIFICULDADE DB 186,'QUAL DIFICULADE VOCE QUER? 1-FACIL 2-MEDIO 3-DIFICIL 4-TESTE                  ',186,'$'
+ENTRADA1    DB 'SE DESLOQUE ATE A CASA (VC ESTA EM 1X1): $'
 ENTRADA2    DB 'DIGITE O NUMERO: $'
-ERRO        DB 10,13,'ALGO DE ERRADO ACONTECEU, TENTE NOVAMENTE :) $'
+ERRO1       DB 10,13,'ALGO DE ERRADO ACONTECEU, TENTE NOVAMENTE :) $'
+ERRO2       DB 10,13,'ALGO DE ERRADO ACONTECEU, ESCOLHA NOVAMENTE A DIFICULDADE :) $'
+CERTO       DB 10,13,'O NUMERO ESTA CERTO, PARABENS $'
+ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
+
 
  
 .CODE
@@ -78,21 +82,16 @@ ERRO        DB 10,13,'ALGO DE ERRADO ACONTECEU, TENTE NOVAMENTE :) $'
         MOV AX,@DATA;
         MOV DS,AX   ; Inicia o segmento de dados
         CALL TELAINICIAL
-    LOOP_MAIN:
-        CALL SAIDA
-        CALL ENTRADA 
-        call saida
-        ;CALL LOGICA
-        ;CMP DL, 18
-        ;JNE LOOP_MAIN
-       ; PRINT TELA1
-       ; PRINT TELA6
-       ; PRINT TELA6
-       ; PRINT TELA6
-        ;PRINT TELA5  
-    FIM:
-        MOV AH,4CH
-        INT 21h
+        LOOP_MAIN:
+            CALL SAIDA
+            CALL ENTRADA
+            CALL CONFERENCIA
+            CMP DX,0
+            JE LOOP_MAIN
+            CALL TELAFINAL
+        FIM:
+            MOV AH,4CH
+            INT 21h
     MAIN ENDP
 
     SAIDA PROC; IMPRESSAO DA MATRIZ NA TELA
@@ -145,7 +144,7 @@ ERRO        DB 10,13,'ALGO DE ERRADO ACONTECEU, TENTE NOVAMENTE :) $'
         DEC CX  ;
         PUSH CX ; DECREMENTA A QUANTIDADE DE QUADRANTES VERTICAIS E GUARDA NA MEMORIA
         JNZ RESTART ; ENQUANTO NAO FOR ZERO RESTARTA O PROCESSO DE IMPRESSAO DE QUADRANTES VERTICAIS
-        POP CX
+        POP CX  ; DESEMPILHA O 0 DE CX PARA O RET NAO BUGAR
         RET
         RESTART:
         JMP QUADRANTE_VERTICAL
@@ -175,7 +174,7 @@ ERRO        DB 10,13,'ALGO DE ERRADO ACONTECEU, TENTE NOVAMENTE :) $'
         PRINT TELA4
         PRINT DIFICULDADE
         PRINT TELA5
-        DIF:
+        DIF:    ; LOGICA PARA ESCOLHA DE DIFICULDADE
         MOV AH,08
         INT 21H
         CMP AL,31H
@@ -197,76 +196,102 @@ ERRO        DB 10,13,'ALGO DE ERRADO ACONTECEU, TENTE NOVAMENTE :) $'
         RET
 
         DIF_ERRO:
-        PRINT ERRO
+        PRINT ERRO2
         JMP DIF
     TELAINICIAL ENDP
     ENTRADA PROC; ENTRADA DE NUMEROS DENTRO DA MATRIZ(SUDOKU
-        LFCR
-        LFCR
-        LFCR
-        XOR BX,BX
-        XOR SI,SI
+        XOR BX,BX   ;
+        XOR SI,SI   ; ZERA REGISTRADORES PARA SEREM UTILIZADOS
 
-        PRINT ENTRADA1; DEFINIR LIMITES
-        IN_1: 
-        MOV AH,01
-        INT 21h
-        CMP AL,13
-        JE IN_2
-        CMP AL,'w'
-        JE IN_UP
-        CMP AL,'a'
-        JE IN_LEFT
-        CMP AL,'s'
-        JE IN_DOWN
-        CMP AL,'d'
-        JE IN_RIGHT
-        JMP IN_ERRO
+        LFCR
+        PRINT ENTRADA1  ; 'SE DESLOQUE ATE A CASA (VC ESTA EM 1X1): $'
 
-        IN_UP:
-            SUB BX, COL
+        IN_1:   ; LOGICA PARA DESLOCAMENTO NA MATRIZ ATRAVES DE WASD
+            MOV AH,01   ;  
+            INT 21h     ;   
+            CMP AL,13   ; 
+            JE IN_2     ; SE FOR "ENTER" PULA PARA IN_2
+            CMP AL,'w'  ; 
+            JE IN_UP    ; SE FOR "W" PULA PARA IN_UP
+            CMP AL,'a'  ;
+            JE IN_LEFT  ; SE FOR "A" PULA PARA IN_LEFT
+            CMP AL,'s'  ;
+            JE IN_DOWN  ; SE FOR "S" PULA PARA IN_DOWM
+            CMP AL,'d'  ;
+            JE IN_RIGHT ; SE FOR "D" PULA PARA IN_RIGTH
+            JMP IN_ERRO ; SE TIVER ALGUMA ENTRADA FORA ISSO PULA PARA IN_ERRO
+
+        IN_UP:  ; desloca uma linha para baixo
+            SUB BX,COL
             JMP IN_1
-        IN_LEFT:
+        IN_LEFT:    ; desloca uma linha para cima
             DEC SI
             JMP IN_1
-        IN_DOWN:
+        IN_DOWN:    ; desloca uma coluna para a esquerda
             ADD BX,COL
             JMP IN_1
-        IN_RIGHT:
+        IN_RIGHT:   ; desloca uma coluna para direita
             INC SI
             JMP IN_1
-        IN_2:
-        CMP BX, 72
-        JG IN_ERRO
-        CMP BX, 0
-        JL IN_ERRO
-        CMP SI, 8
-        JG IN_ERRO
-        CMP SI, 0
-        JL IN_ERRO
-        PRINT ENTRADA2
-        MOV AH,01
-        INT 21h
-        CMP AL, '0' 
-        JL IN_ERRO 
-        CMP AL, '9' 
-        JG IN_ERRO 
-        AND AL,0Fh 
-        MOV MATRIZ [BX][SI],AL
-        JMP FIM_E
 
-        IN_ERRO:
-        LFCR
-        LFCR
-        LFCR
-        LFCR
-        PRINT ERRO
-        FIM_E:
-       RET 
+        IN_2:
+            CMP BX, 72  ;
+            JG IN_ERRO  ;
+            CMP BX, 0   ;
+            JL IN_ERRO  ;
+            CMP SI, 8   ;
+            JG IN_ERRO  ;
+            CMP SI, 0   ; LOGICA PARA NÃO ACEITAR POSICOES FORA DA MATRIZ 
+            JL IN_ERRO  ; 
+
+        PRINT ENTRADA2  ; 'DIGITE O NUMERO: $'
+        MOV AH,01
+        INT 21h     
+        CMP AL, '1' ;
+        JL IN_ERRO  ;
+        CMP AL, '9' ;
+        JG IN_ERRO  ;
+        AND AL,0Fh  ; LOGICA PARA PERMITIR ENTRADA DE NUMEROS DE 1-9
+
+        CMP AL, MATRIZ2[BX][SI] ;
+        JE IN_CERTO             ;
+        PRINT ERRADO            ;
+        JMP FIM_E               ;
+        IN_CERTO:               ; 
+        MOV MATRIZ [BX][SI],AL  ; 
+        PRINT CERTO             ; PEGA O NUMERO DIGITADO PELO USUARIO, COMPARA COM O CARTAO RESPOSTA(MATRIZ2)
+        JMP FIM_E               ; SE FOR IGUAL ELE MANDA PARA MATRIZ(SUDOKU), SE Ñ EXIBE UMA MENSAGEM DE NUMERO ERRADO
+
+        IN_ERRO:            ;
+            PRINT ERRO1 ; MENSAGEM DE ERRO
+        FIM_E: 
+     RET 
     ENTRADA ENDP
-    LOGICA PROC; ESSE PROC VAI ANALISAR LINHA/COLUNA/QUADRANTE PARA VER SE ESTA CERTO OS NUMEROS ATRAVES DA SOMA DELES
-       RET
-    LOGICA ENDP
+    CONFERENCIA PROC; ESSE PROC VAI ANALISAR SE O JOGO ESTA COMPLETO E CORRETO
+     ; PENSEI EM VARIAS MANEIRAS, SEJA POR SOMA DE ITENS INDIVIDUIAS TOTAL, CONFERENCIA DE LINHA/COLUNA/QUADRANTE 
+     ; COMPARAR A MATRIZ(SUDOKU) COM A MATRIZ2(CARTAO RESPOSTA), O MAIS SIMPLES QUE EU PENSEI FOI:
+     ; PERCORRER TODA A MATRIZ(SUDOKU) SE ELE NAO ENCONTRAR NENHUM ZERO QUER DIZER QUE VC GANHOU, 
+     ; POIS A LOGICA DE ENTRADA SÓ PERMITE A ENTRADA DE NUMEROS CORRETOS
+
+        XOR BX,BX
+        XOR DX,DX
+        MOV CH,LIN
+        CONF_2:
+            XOR SI,SI
+            MOV CL,COL
+                CONF_1:
+                    CMP MATRIZ[BX][SI],0
+                    JE CONF_FIM
+                    INC SI
+                    DEC CL
+                JNE CONF_1
+            ADD BX, COL
+            DEC CH
+        JNE CONF_2
+        INC DX
+        CONF_FIM:
+     RET
+    CONFERENCIA ENDP
     TELAFINAL PROC
         
     TELAFINAL ENDP
