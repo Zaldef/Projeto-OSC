@@ -5,9 +5,9 @@ TITLE SUDOKU Guilherme Bernardini Roelli (22899140)
 LIN         EQU  9
 COL         EQU  9
 MATRIZ      DB LIN DUP(COL DUP(?))
+MATRIZ2     DB LIN DUP(COL DUP(?))
 
-MATRIZ2      DB LIN DUP(COL DUP(?))
-
+PRINT 
 MOLDURA     DB 10,13,201,2 DUP(11 DUP (205),203),11 DUP (205),187,'$'
 LINHA1      DB 10,13,3 DUP(186,32,2 DUP (196),197, 3 DUP (196), 197, 2 DUP (196),32),186, '$'
 LINHA2      DB 10,13,204,2 DUP(11 DUP (205),206),11 DUP (205),185,'$'
@@ -43,6 +43,10 @@ ERRO1       DB 10,13,'ALGO DE ERRADO ACONTECEU, TENTE NOVAMENTE :) $'
 ERRO2       DB 10,13,'ALGO DE ERRADO ACONTECEU, ESCOLHA NOVAMENTE A DIFICULDADE :) $'
 CERTO       DB 10,13,'O NUMERO ESTA CERTO, PARABENS $'
 ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
+FAC         DB 10,13,'VOCE ESCOLHEU A DIFICULDADE FACIL$' 
+MED         DB 10,13,'VOCE ESCOLHEU A DIFICULDADE MEDIO$' 
+DIFI        DB 10,13,'VOCE ESCOLHEU A DIFICULDADE DIFICIL$' 
+TST         DB 10,13,'VOCE ESCOLHEU A DIFICULDADE TESTE$' 
 
 
  
@@ -82,8 +86,12 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
         MOV AX,@DATA;
         MOV DS,AX   ; Inicia o segmento de dados
         CALL TELAINICIAL
+        LFCR
+        LFCR
         LOOP_MAIN:
             CALL SAIDA
+            LFCR
+            LFCR
             CALL ENTRADA
             CALL CONFERENCIA
             CMP DX,0
@@ -183,15 +191,24 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
         JE DIF_MED
         CMP AL,33H
         JE DIF_DIF
+        CMP AL,34H
+        JE DIF_TST
         JMP DIF_ERRO
         DIF_FAC:
         CALL FACIL
+        PRINT FAC
         JMP DIF_EXIT
         DIF_MED:
         CALL MEDIO
+        PRINT MED
         JMP DIF_EXIT  
         DIF_DIF:
         CALL DIFICIL
+        PRINT DIFI
+        JMP DIF_EXIT 
+        DIF_TST:
+        CALL TESTE
+        PRINT TST
         DIF_EXIT:
         RET
 
@@ -203,7 +220,6 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
         XOR BX,BX   ;
         XOR SI,SI   ; ZERA REGISTRADORES PARA SEREM UTILIZADOS
 
-        LFCR
         PRINT ENTRADA1  ; 'SE DESLOQUE ATE A CASA (VC ESTA EM 1X1): $'
 
         IN_1:   ; LOGICA PARA DESLOCAMENTO NA MATRIZ ATRAVES DE WASD
@@ -406,7 +422,6 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
                 MOV MATRIZ2 [BX][SI],4
                 INC SI
                 MOV MATRIZ2 [BX][SI],8
-                INC SI
             ADD BX, COL
             XOR SI,SI
                 MOV MATRIZ2 [BX][SI],7
@@ -426,7 +441,6 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
                 MOV MATRIZ2 [BX][SI],1
                 INC SI
                 MOV MATRIZ2 [BX][SI],3
-                INC SI
             ADD BX, COL
             XOR SI,SI
                 MOV MATRIZ2 [BX][SI],8
@@ -446,7 +460,6 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
                 MOV MATRIZ2 [BX][SI],7
                 INC SI
                 MOV MATRIZ2 [BX][SI],5
-                INC SI
             ADD BX, COL
             XOR SI,SI
                 MOV MATRIZ2 [BX][SI],3
@@ -466,7 +479,6 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
                 MOV MATRIZ2 [BX][SI],2
                 INC SI
                 MOV MATRIZ2 [BX][SI],7
-                INC SI
             ADD BX, COL
             XOR SI,SI
                 MOV MATRIZ2 [BX][SI],5
@@ -486,7 +498,6 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
                 MOV MATRIZ2 [BX][SI],3
                 INC SI
                 MOV MATRIZ2 [BX][SI],1
-                INC SI
             ADD BX, COL
             XOR SI,SI
                 MOV MATRIZ2 [BX][SI],2
@@ -506,7 +517,6 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
                 MOV MATRIZ2 [BX][SI],6
                 INC SI
                 MOV MATRIZ2 [BX][SI],9
-                INC SI
             ADD BX, COL
             XOR SI,SI
                 MOV MATRIZ2 [BX][SI],9
@@ -526,7 +536,6 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
                 MOV MATRIZ2 [BX][SI],5
                 INC SI
                 MOV MATRIZ2 [BX][SI],4
-                INC SI
             ADD BX, COL
             XOR SI,SI
                 MOV MATRIZ2 [BX][SI],6
@@ -546,7 +555,6 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
                 MOV MATRIZ2 [BX][SI],9
                 INC SI
                 MOV MATRIZ2 [BX][SI],2
-                INC SI
             ADD BX, COL
             XOR SI,SI
                 MOV MATRIZ2 [BX][SI],4
@@ -566,7 +574,6 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
                 MOV MATRIZ2 [BX][SI],8
                 INC SI
                 MOV MATRIZ2 [BX][SI],6
-                INC SI
         RET  
     FACIL ENDP
     MEDIO PROC; DIFICULDADE (PREENCHIMENTO DA MATRIZ(SUDOKU))
@@ -632,8 +639,6 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
             MOV MATRIZ [BX][SI],2
             INC SI
             MOV MATRIZ [BX][SI],8
-            ADD BX, COL
-            XOR SI,SI
 
         ; SUDOKU COMPLETO(resposta)
             XOR BX,BX
@@ -655,7 +660,6 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
                 MOV MATRIZ2 [BX][SI],6
                 INC SI
                 MOV MATRIZ2 [BX][SI],3
-                INC SI
             ADD BX,COL
             XOR SI,SI
                 MOV MATRIZ2 [BX][SI],3
@@ -675,7 +679,6 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
                 MOV MATRIZ2 [BX][SI],9
                 INC SI
                 MOV MATRIZ2 [BX][SI],5
-                INC SI
             ADD BX,COL
             XOR SI,SI
                 MOV MATRIZ2 [BX][SI],6
@@ -695,7 +698,6 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
                 MOV MATRIZ2 [BX][SI],7
                 INC SI
                 MOV MATRIZ2 [BX][SI],8
-                INC SI 
             ADD BX,COL
             XOR SI,SI
                 MOV MATRIZ2 [BX][SI],9
@@ -715,7 +717,6 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
                 MOV MATRIZ2 [BX][SI],8
                 INC SI
                 MOV MATRIZ2 [BX][SI],4
-                INC SI 
             ADD BX,COL
             XOR SI,SI
                 MOV MATRIZ2 [BX][SI],2
@@ -735,7 +736,6 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
                 MOV MATRIZ2 [BX][SI],1
                 INC SI
                 MOV MATRIZ2 [BX][SI],6
-                INC SI 
             ADD BX,COL
             XOR SI,SI
                 MOV MATRIZ2 [BX][SI],4
@@ -755,7 +755,6 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
                 MOV MATRIZ2 [BX][SI],3
                 INC SI
                 MOV MATRIZ2 [BX][SI],2
-                INC SI 
             ADD BX,COL
             XOR SI,SI
                 MOV MATRIZ2 [BX][SI],5
@@ -775,7 +774,6 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
                 MOV MATRIZ2 [BX][SI],4
                 INC SI
                 MOV MATRIZ2 [BX][SI],9
-                INC SI 
             ADD BX,COL
             XOR SI,SI
                 MOV MATRIZ2 [BX][SI],8
@@ -795,7 +793,6 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
                 MOV MATRIZ2 [BX][SI],2
                 INC SI
                 MOV MATRIZ2 [BX][SI],1
-                INC SI 
             ADD BX,COL
             XOR SI,SI
                 MOV MATRIZ2 [BX][SI],1
@@ -814,8 +811,7 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
                 INC SI
                 MOV MATRIZ2 [BX][SI],5
                 INC SI
-                MOV MATRIZ2 [BX][SI],7
-                INC SI 
+                MOV MATRIZ2 [BX][SI],7 
         RET
     MEDIO ENDP
     DIFICIL PROC; DIFICULDADE (PREENCHIMENTO DA MATRIZ(SUDOKU))
@@ -883,8 +879,180 @@ ERRADO      DB 10,13,'O NUMERO ESTA ERRADO, TENTE NOVAMENTE $'
         MOV MATRIZ [BX][SI],3
         
     ; SUDOKU COMPLETO(resposta)
-        XOR BX,BX
-        XOR SI,SI
+            XOR BX,BX
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI
+                MOV MATRIZ2 [BX][SI],1
+            ADD BX, COL
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+                MOV MATRIZ2 [BX][SI],4
+            ADD BX, COL
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI
+                MOV MATRIZ2 [BX][SI],9
+            ADD BX, COL
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI
+                MOV MATRIZ2 [BX][SI],2
+            ADD BX, COL
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI
+                MOV MATRIZ2 [BX][SI],5
+            ADD BX, COL
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+                MOV MATRIZ2 [BX][SI],7
+            ADD BX, COL
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI
+                MOV MATRIZ2 [BX][SI],8
+            ADD BX, COL
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI
+                MOV MATRIZ2 [BX][SI],3
+                INC SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI
+                MOV MATRIZ2 [BX][SI],6
+            ADD BX, COL
+            XOR SI,SI
+                MOV MATRIZ2 [BX][SI],7
+                INC SI
+                MOV MATRIZ2 [BX][SI],2
+                INC SI
+                MOV MATRIZ2 [BX][SI],8
+                INC SI
+                MOV MATRIZ2 [BX][SI],1
+                INC SI
+                MOV MATRIZ2 [BX][SI],4
+                INC SI
+                MOV MATRIZ2 [BX][SI],6
+                INC SI
+                MOV MATRIZ2 [BX][SI],5
+                INC SI
+                MOV MATRIZ2 [BX][SI],9
+                INC SI
+                MOV MATRIZ2 [BX][SI],3
     RET
     DIFICIL ENDP
+    TESTE PROC
+        RET
+    TESTE ENDP
 END MAIN
